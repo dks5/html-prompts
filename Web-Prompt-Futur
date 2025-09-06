@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Промпт для Gemini</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  
+  :root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-card: #1a1a1a;
+    --bg-hover: #252525;
+    --text-primary: #e5e5e5;
+    --text-secondary: #a3a3a3;
+    --text-muted: #737373;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-glow: rgba(59, 130, 246, 0.5);
+    --success: #10b981;
+    --border: #262626;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 24px;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-y: hidden;
+    background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(circle at 85% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--bg-secondary);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    backdrop-filter: blur(10px);
+  }
+  
+  .header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+  }
+  
+  h2 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, var(--accent), #8b5cf6);
+  }
+  
+  textarea {
+    width: 100%;
+    min-height: 400px;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    overflow-y: hidden;
+  }
+  
+  textarea:focus {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  textarea:hover {
+    box-shadow: none;
+    transform: translateY(-2px);
+  }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.3s;
+    position: relative;
+  }
+
+  .copy-btn:hover {
+    background-color: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px var(--accent-glow);
+  }
+
+  .copy-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  .copy-btn.copied {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .copy-btn .tooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .copy-btn:hover .tooltip {
+    opacity: 1;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 768px) {
+    body {
+      padding: 16px;
+    }
+
+    .container {
+      padding: 16px;
+    }
+    
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    textarea {
+      font-size: 12px;
+    }
+  }
+
+  /* Ensure circles remain perfect on all devices */
+  .circle-number {
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0; /* Remove padding */
+  }
+</style>
+</head>
+<body class="p-6 md:p-12">
+
+<div class="container fade-in">
+  <div class="header">
+    <h2>Промпт для создания HTML-инструкции</h2>
+    <button id="copy-btn" class="copy-btn" onclick="copyPrompt()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+      </svg>
+      <span class="tooltip">Копировать промпт</span>
+    </button>
+  </div>
+  <textarea id="prompt-textarea" class="fade-in" oninput="autoResizeTextarea()">
+Создай интерактивную HTML-страницу, которая служит руководством или инструкцией. Следуй этому стилю:
+
+**Дизайн и цвета:**
+* Используй тёмную, футуристическую тему.
+* Основной фон должен быть очень тёмно-серым или чёрным.
+* Акцентные элементы (кнопки, заголовки, номера шагов) должны иметь градиент из синего в фиолетовый.
+* Текст должен быть светлым: основной — светло-серый, второстепенный — тёмно-серый.
+* Добавь мягкое свечение (glow effect) вокруг акцентных элементов.
+
+**Типографика:**
+* Для заголовков и основного текста используй современный шрифт без засечек (например, 'Inter').
+* Для блоков кода используй моноширинный шрифт (например, 'JetBrains Mono').
+
+**Макет и компоненты:**
+* Руководство должно быть разделено на чёткие секции с заголовками, например, "Установка" и "Примеры".
+* Используй карточки (cards) для группировки контента. Карточки должны иметь закруглённые углы и тонкие рамки.
+* Каждый шаг инструкции должен быть обозначен крупным, акцентным номером в круге. Чтобы круги оставались идеальными на всех устройствах, используй CSS свойство aspect-ratio: 1 / 1.
+* Включи интерактивные вкладки для переключения между разными примерами.
+* Блоки кода должны быть визуально выделены и содержать кнопку "Копировать" с пиктограммой.
+
+**Анимация и эффекты:**
+* Реализуй плавные эффекты появления элементов при прокрутке страницы.
+* Добавь эффект свечения и легкого подъёма карточек при наведении курсора.
+
+**Язык:**
+* Текст руководства должен быть на русском языке.
+* Инструкции должны быть ясными, пошаговыми и содержать примеры команд.
+  </textarea>
+</div>
+
+<script>
+function autoResizeTextarea() {
+  const textarea = document.getElementById('prompt-textarea');
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+window.addEventListener('load', autoResizeTextarea);
+
+function copyPrompt() {
+  const promptText = document.getElementById('prompt-textarea').value;
+  const copyBtn = document.getElementById('copy-btn');
+  navigator.clipboard.writeText(promptText).then(() => {
+    // Show a temporary checkmark on success
+    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      // Revert to the original icon after a delay
+      copyBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+      copyBtn.classList.remove('copied');
+    }, 2000);
+  }).catch(err => {
+    console.error('Не удалось скопировать текст: ', err);
+    // Show an error icon on failure
+    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg>';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+      copyBtn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
