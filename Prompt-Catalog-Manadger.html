@@ -1,580 +1,745 @@
-html
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Менеджер Промптов</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+
     <!-- Custom Styles -->
     <style>
-        :root {
-            --primary-color: #34568B; /* Сине-серый */
-            --secondary-color: #6c757d; /* Серый */
-            --light-bg: #f8f9fa;
-            --border-color: #dee2e6;
-            --card-bg: #ffffff;
-            --text-color: #212529;
-        }
+      :root {
+        --primary-color: #34568b; /* Сине-серый */
+        --secondary-color: #6c757d; /* Серый */
+        --light-bg: #f8f9fa;
+        --border-color: #dee2e6;
+        --card-bg: #ffffff;
+        --text-color: #212529;
+      }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
 
-        .navbar {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+      .container {
+        max-width: 1200px;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+      }
 
-        .nav-tabs {
-            border-bottom: none;
-        }
+      .header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem; /* Уменьшаем отступ для более компактного вида */
+        border-radius: 0.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
 
-        .nav-tabs .nav-link {
-            border: 1px solid transparent;
-            border-bottom: none;
-            color: var(--secondary-color);
-            margin-bottom: -1px; /* Компенсация границы контейнера */
-        }
+      .header h1 {
+        font-size: 1.75rem; /* Уменьшаем размер заголовка */
+        margin-bottom: 0.25rem;
+      }
 
-        .nav-tabs .nav-link.active {
-            background-color: var(--light-bg);
-            border-color: var(--border-color) var(--border-color) var(--light-bg);
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .tab-content {
-            background-color: var(--light-bg);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            padding: 1.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .tab-content {
-                border: none;
-                padding: 0;
-                background-color: transparent;
-            }
-        }
+      .header p {
+        font-size: 1rem; /* Уменьшаем размер подзаголовка */
+        margin-bottom: 0;
+      }
 
-        .prompt-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            height: 100%;
-            transition: box-shadow 0.3s ease-in-out;
-        }
+      .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        height: 100%;
+      }
 
-        .prompt-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+      .prompt-card .card-text {
+        min-height: 80px;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
 
-        .prompt-card .card-body {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .prompt-card .card-text {
-            white-space: pre-wrap;
-            background-color: #fdfdfd;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 5px;
-            flex-grow: 1;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 0.9rem;
-        }
+      .nav-tabs .nav-link {
+        color: var(--secondary-color);
+        border-color: var(--border-color);
+      }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
+      .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background-color: var(--card-bg);
+        border-color: var(--border-color) var(--border-color) var(--card-bg);
+      }
 
-        .tab-controls {
-            display: inline-flex;
-            gap: 8px;
-            margin-left: 10px;
-            font-size: 0.8em;
-        }
-        .tab-controls i {
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        .tab-controls .edit-btn:hover {
-            background-color: #ffc107; /* warning */
-            color: white;
-        }
-        .tab-controls .delete-btn:hover {
-            background-color: #dc3545; /* danger */
-            color: white;
-        }
-        
-        .copy-btn {
-            cursor: pointer;
-            font-size: 0.8rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-        .copy-btn:hover {
-            opacity: 1;
-        }
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
 
-        @media (max-width: 991.98px) {
-            .nav-tabs {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .nav-tabs .nav-item {
-                width: 100%;
-            }
-            .nav-tabs .nav-link {
-                 text-align: left;
-                 border-bottom: 1px solid var(--border-color);
-                 margin-bottom: 0;
-            }
-            .nav-tabs .nav-link.active {
-                border-color: var(--border-color);
-                border-left: 3px solid var(--primary-color);
-            }
-        }
+      .btn-primary:hover {
+        background-color: #2c476f;
+        border-color: #2c476f;
+      }
+
+      .prompt-variations {
+        margin-top: 1rem;
+      }
+
+      .form-control.is-invalid {
+        border-color: #dc3545;
+        padding-right: 2.25rem;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linecap='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <!-- Main Container -->
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1>Менеджер Промптов</h1>
+        <p>Создавайте, храните и управляйте вашими промптами</p>
+      </header>
 
-    <!-- Header -->
-    <header class="navbar navbar-expand-lg sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
-                <i class="bi bi-robot" style="color: var(--primary-color);"></i>
-                Менеджер Промптов
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <!-- Navigation tabs will be inserted here by JS -->
-                </ul>
-                <button id="addPromptBtn" class="btn btn-primary ms-lg-2 mt-2 mt-lg-0">
-                    <i class="bi bi-plus-lg"></i> Добавить промпт
-                </button>
+      <!-- Main Content -->
+      <main class="row">
+        <!-- Prompt Controls -->
+        <div class="col-12 mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="dropdown">
+              <button
+                class="btn btn-primary dropdown-toggle"
+                type="button"
+                id="promptDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Выберите промпт
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="promptDropdown" id="promptDropdownMenu">
+                <!-- Dropdown items will be rendered here by JS -->
+              </ul>
             </div>
+            <button
+              id="addPromptBtn"
+              class="btn btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#promptModal"
+            >
+              <i class="bi-plus-circle-fill"></i>
+              <span class="ms-1">Добавить промпт</span>
+            </button>
+          </div>
         </div>
-    </header>
 
-    <main class="container mt-4">
-        <!-- Tab navigation placeholder for desktop -->
-        <ul class="nav nav-tabs d-none d-lg-flex" id="prompt-tabs" role="tablist">
-            <!-- Tabs will be dynamically inserted here -->
-        </ul>
-        <!-- Tab content placeholder -->
-        <div class="tab-content" id="prompt-tab-content">
-            <!-- Tab panes will be dynamically inserted here -->
+        <!-- Prompt Content -->
+        <div class="col-12">
+          <div
+            class="tab-content border bg-white p-4 rounded-3"
+            id="prompt-tab-content"
+          >
+            <!-- Tab content will be rendered here by JS -->
+            <div class="tab-pane fade show active" id="no-prompt-selected">
+              <p class="text-muted text-center py-5">
+                Выберите промпт из списка, или создайте новый.
+              </p>
+            </div>
+          </div>
         </div>
-    </main>
+      </main>
+    </div>
 
     <!-- Modals and Toasts here... -->
-    <!-- Modal for Add/Edit Prompt -->
-    <div class="modal fade" id="promptModal" tabindex="-1" aria-labelledby="promptModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="promptModalLabel">Добавить новый промпт</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+    <!-- Prompt Modal (Add/Edit) -->
+    <div
+      class="modal fade"
+      id="promptModal"
+      tabindex="-1"
+      aria-labelledby="promptModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="promptModalLabel">Новый промпт</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="promptForm">
+              <div class="mb-3">
+                <label for="promptTabNameInput" class="form-label"
+                  >Название промпта</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="promptTabNameInput"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Пожалуйста, введите название промпта.
                 </div>
-                <div class="modal-body">
-                    <form id="promptForm">
-                        <input type="hidden" id="promptId">
-                        <div class="mb-3">
-                            <label for="promptTabName" class="form-label">Название закладки*</label>
-                            <input type="text" class="form-control" id="promptTabName" required placeholder="Например, 'Генерация кода'">
-                            <div class="invalid-feedback">Название закладки не может быть пустым.</div>
-                        </div>
-                        <hr>
-                        <!-- Prompt Variations -->
-                        <div class="row">
-                            <div class="col-lg-4 mb-3">
-                                <h6>Вариант 1</h6>
-                                <div class="mb-2">
-                                    <label for="promptTitle1" class="form-label">Заголовок</label>
-                                    <input type="text" class="form-control" id="promptTitle1" placeholder="Заголовок варианта 1">
-                                </div>
-                                <div>
-                                    <label for="promptText1" class="form-label">Текст промпта</label>
-                                    <textarea class="form-control" id="promptText1" rows="10" placeholder="Текст промпта для варианта 1"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 mb-3">
-                                <h6>Вариант 2</h6>
-                                <div class="mb-2">
-                                    <label for="promptTitle2" class="form-label">Заголовок</label>
-                                    <input type="text" class="form-control" id="promptTitle2" placeholder="Заголовок варианта 2">
-                                </div>
-                                <div>
-                                    <label for="promptText2" class="form-label">Текст промпта</label>
-                                    <textarea class="form-control" id="promptText2" rows="10" placeholder="Текст промпта для варианта 2"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 mb-3">
-                                <h6>Вариант 3</h6>
-                                <div class="mb-2">
-                                    <label for="promptTitle3" class="form-label">Заголовок</label>
-                                    <input type="text" class="form-control" id="promptTitle3" placeholder="Заголовок варианта 3">
-                                </div>
-                                <div>
-                                    <label for="promptText3" class="form-label">Текст промпта</label>
-                                    <textarea class="form-control" id="promptText3" rows="10" placeholder="Текст промпта для варианта 3"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" id="savePromptBtn" class="btn btn-primary">Сохранить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Вы уверены, что хотите удалить этот промпт? Это действие необратимо.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Удалить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Toast Notification -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto">Уведомление</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          Текст промпта скопирован в буфер обмена.
+              </div>
+
+              <div id="variationsContainer">
+                <h6 class="mb-3">Вариации</h6>
+                <!-- Variations will be dynamically added here -->
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="addVariationBtn">
+                <i class="bi-plus-lg"></i> Добавить вариацию
+              </button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Отмена
+            </button>
+            <button type="button" class="btn btn-primary" id="savePromptBtn">
+              Сохранить
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div
+      class="modal fade"
+      id="deleteConfirmModal"
+      tabindex="-1"
+      aria-labelledby="deleteConfirmModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">
+              Удалить промпт
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Вы уверены, что хотите удалить этот промпт?
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Отмена
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+              Удалить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="copyToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <i class="bi-check-circle-fill text-success me-2"></i>
+          <strong class="me-auto">Скопировано!</strong>
+          <small class="text-body-secondary">Сейчас</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body">Текст промпта скопирован в буфер обмена.</div>
+      </div>
+    </div>
+
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
 
-    <!-- Custom App Logic -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // DOM Elements
-            const addPromptBtn = document.getElementById('addPromptBtn');
-            const savePromptBtn = document.getElementById('savePromptBtn');
-            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-            const navbarCollapseEl = document.getElementById('navbarNav');
-            
-            // Modals and Components
-            const promptModal = new bootstrap.Modal(document.getElementById('promptModal'));
-            const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            const copyToast = new bootstrap.Toast(document.getElementById('copyToast'));
-            const bsCollapse = new bootstrap.Collapse(navbarCollapseEl, { toggle: false });
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DATA & STATE ---
+        let prompts = [];
+        let promptIdToEdit = null;
+        let promptIdToDelete = null;
+        let activePromptId = null;
 
-            // Form elements
-            const promptForm = document.getElementById('promptForm');
-            const promptIdInput = document.getElementById('promptId');
-            const promptTabNameInput = document.getElementById('promptTabName');
+        const defaultPrompts = [
+          {
+            id: 'd1',
+            tabName: "Переводчик",
+            isDefault: true,
+            variations: [
+              {
+                id: 'v1',
+                title: "С английского на русский",
+                text: "Переведи следующий текст с английского на русский язык и сохрани исходный стиль: {{TEXT}}",
+              },
+              {
+                id: 'v2',
+                title: "С русского на английский",
+                text: "Переведи следующий текст с русского на английский язык и сохрани исходный стиль: {{TEXT}}",
+              },
+            ],
+          },
+          {
+            id: 'd2',
+            tabName: "Резюмирование",
+            isDefault: true,
+            variations: [
+              {
+                id: 'v3',
+                title: "Краткое резюме",
+                text: "Сделай краткое резюме следующего текста, выделив основные идеи и ключевые моменты: {{TEXT}}",
+              },
+              {
+                id: 'v4',
+                title: "Подробное резюме",
+                text: "Сделай подробное резюме следующего текста, с акцентом на факты, детали и примеры: {{TEXT}}",
+              },
+            ],
+          },
+          {
+            id: 'default-1',
+            tabName: 'Транскрипция текста с изображения',
+            isDefault: true,
+            variations: [
+                { title: 'Вариант 1: Сбалансированный и универсальный (рекомендуется)', text: 'Сделай дословную транскрипцию всего текста с изображения. Строго следуй этим правилам:\n1.  **Точность:** Копируй текст символ в символ, включая все опечатки, ошибки и знаки препинания.\n2.  **Структура:** Сохраняй все переносы строк, абзацы и множественные пробелы.\n3.  **Форматирование:** Визуальный стиль (жирный, курсив) передавай с помощью Markdown (**жирный**, *курсив*).\n4.  **Запрет на редактирование:** Ничего не исправляй, не дополняй и не изменяй.' },
+                { title: 'Вариант 2: Лаконичный (для быстрого использования)', text: 'Извлеки текст с изображения как есть, без каких-либо изменений. Сохраняй регистр, пунктуацию, ошибки и все пробелы. Форматирование (жирный, курсив) передай через Markdown.' },
+                { title: 'Вариант 3: Максимальный контроль (для сложных документов)', text: 'Создай точную текстовую копию (транскрипцию) документа с изображения, соблюдая следующие требования:\n-   **Дословность:** Текст должен быть воспроизведен на 100% идентично, включая грамматические и орфографические ошибки.\n-   **Сохранение структуры:** Воспроизведи все абзацы, разрывы строк и отступы, используя символы пробела и переноса строки.\n-   **Передача форматирования:**\n    -   Жирный текст заключай в **звездочки**.\n    -   Курсив — в *звездочки*.\n    -   Списки воспроизводи с сохранением маркеров (-, *, 1.).\n    -   Если на изображении есть таблица, представь её в виде Markdown-таблицы.\n-   **Запрет на интерпретацию:** Не добавляй никакого текста, комментариев или исправлений, которых нет в источнике.' }
+            ]
+          },
+          {
+            id: 'default-2',
+            tabName: 'Структурирование и форматирование текста',
+            isDefault: true,
+            variations: [
+                { title: 'Вариант 1: Максимальная читаемость и структура', text: '**Роль:** Ты — эксперт по информационному дизайну и UX-копирайнтингу. Твоя задача — не просто форматировать текст, а улучшать его восприятие и усвоение информации.\n\n**Задача:** Возьми предоставленный ниже текст и преобразуй его в идеально структурированный Markdown-документ. Главная цель — максимальная читаемость и понятность для профессиональной аудитории. Ты можешь незначительно изменять формулировки для ясности и добавлять логические связки, но основной смысл должен быть сохранен.\n\n**Инструкции:**\n1.  **Структура и заголовки:** Проанализируй текст и разбей его на логические блоки. Для каждого блока создай информативные заголовки и подзаголовки (#, ##, ###).\n2.  **Списки:** Все перечисления, шаги или ключевые пункты оформи в виде маркированных (*) или нумерованных (1.) списков.\n3.  **Акценты:** Выдели ключевые термины и важные идеи с помощью жирного шрифта и курсива. Делай это умеренно, чтобы не перегружать текст.\n4.  **Цитаты:** Если в тексте есть прямые цитаты, мнения экспертов или особенно важные выводы, оформи их как цитаты (>).\n5.  **Таблицы:** Если найдешь данные, которые можно логично представить в виде таблицы (сравнения, характеристики), создай её.\n6.  **Читаемость абзацев:** Длинные абзацы разбей на более короткие (3-5 строк) для облегчения сканирования текста.\n7.  **Ссылки:** Если в тексте есть URL-адреса, преврати их в осмысленные гиперссылки.\n\n**Текст для обработки:**\n[СЮДА ВСТАВИТЬ ИСХОДНЫЙ ТЕКСТ]' },
+                { title: 'Вариант 2: Эффектная и «живая» подача', text: '**Роль:** Ты — креативный контент-маркетолог и специалист по визуализации. Твоя задача — превратить сухой текст в яркий, запоминающийся и визуально привлекательный материал.\n\n**Задача:** Возьми предоставленный ниже текст и отформатируй его в Markdown, используя максимум креативных возможностей для эффектной подачи. Цель — удержать внимание читателя и произвести "вау-эффект". Ты можешь свободно изменять структуру текста, добавлять визуальные элементы и перефразировать для большей убедительности.\n\n**Инструкции:**\n1.  **Броские заголовки:** Создай цепляющие заголовки и подзаголовки. Можно добавить к ним релевантные эмодзи (например, ## 🚀 Основные преимущества).\n2.  **Эмодзи и иконки:** Активно, но уместно используй эмодзи в тексте и списках, чтобы проиллюстрировать идеи (✅, ➡️, 🎯).\n3.  **Визуальные акценты с HTML:** Используй базовые HTML-теги для выделения цветом ключевых фраз. Например: ...сэкономить до 50% времени.\n4.  **Эффект "слайдов":** Разделяй крупные логические блоки с помощью горизонтальной линии (---).\n5.  **Ключевые выводы (Key Takeaways):** Самые важные мысли оформи в виде блока с цитатой и иконкой, например: > 💡 **Главная мысль:** ...\n6.  **Призывы к действию (CTA):** Если в тексте есть подразумеваемый призыв к действию, выдели его жирным шрифтом или в виде цитаты.\n\n**Текст для обработки:**\n[СЮДА ВСТАВИТЬ ИСХОДНЫЙ ТЕКСТ]' },
+                { title: 'Вариант 3: Сбалансированный (оптимизированная формулировка)', text: 'Преобразуй предоставленный текст в формат Markdown, не сокращая исходное содержание.\n\nСфокусируйся на двух целях:\n1.  **Читаемость:** Используй заголовки, подзаголовки, списки, выделения, таблицы, цитаты и ссылки для создания чёткой и логичной структуры.\n2.  **Эффектность:** Добавь уместные визуальные элементы (эмодзи, цветовое оформление через HTML) для более яркой и запоминающейся подачи.\n\nСделай оформление максимально выразительным, но при этом профессиональным и удобным для восприятия.\n\n**Текст для обработки:**\n[СЮДА ВСТАВИТЬ ИСХОДНЫЙ ТЕКСТ]' }
+            ]
+          }
+        ];
 
-            const STORAGE_KEY = 'promptManagerData';
-            let prompts = [];
-            let promptIdToDelete = null;
+        // --- DOM ELEMENTS ---
+        const promptDropdownBtn = document.getElementById("promptDropdown");
+        const promptDropdownMenu = document.getElementById("promptDropdownMenu");
+        const promptTabContentEl = document.getElementById("prompt-tab-content");
+        const promptModalEl = document.getElementById("promptModal");
+        const deleteConfirmModalEl = document.getElementById("deleteConfirmModal");
+        const promptModal = new bootstrap.Modal(promptModalEl);
+        const deleteConfirmModal = new bootstrap.Modal(deleteConfirmModalEl);
+        const addPromptBtn = document.getElementById("addPromptBtn");
+        const savePromptBtn = document.getElementById("savePromptBtn");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const addVariationBtn = document.getElementById("addVariationBtn");
+        const copyToast = new bootstrap.Toast(document.getElementById("copyToast"));
+        const promptTabNameInput = document.getElementById("promptTabNameInput");
 
-            const defaultPrompts = [
-                 {
-                    id: 'default-1',
-                    tabName: 'Транскрипция текста',
-                    isDefault: true,
-                    variations: [
-                        { title: 'Вариант 1: Сбалансированный', text: 'Текст промпта 1.1' },
-                        { title: 'Вариант 2: Лаконичный', text: 'Текст промпта 1.2' },
-                        { title: 'Вариант 3: Максимальный контроль', text: 'Текст промпта 1.3' }
-                    ]
-                },
-                {
-                    id: 'default-2',
-                    tabName: 'Форматирование текста',
-                    isDefault: true,
-                    variations: [
-                        { title: 'Вариант 1: Максимальная читаемость', text: 'Текст промпта 2.1' },
-                        { title: 'Вариант 2: Эффектная подача', text: 'Текст промпта 2.2' },
-                        { title: 'Вариант 3: Сбалансированный', text: 'Текст промпта 2.3' }
-                    ]
+        // --- DATA FUNCTIONS ---
+        function loadPrompts() {
+          const storedPrompts = localStorage.getItem("prompts");
+          if (storedPrompts) {
+            prompts = JSON.parse(storedPrompts);
+          } else {
+            prompts = defaultPrompts;
+            savePrompts();
+          }
+          if (prompts.length > 0) {
+            activePromptId = prompts[0].id;
+          }
+        }
+
+        function savePrompts() {
+          localStorage.setItem("prompts", JSON.stringify(prompts));
+        }
+
+        function findPrompt(id) {
+          return prompts.find((p) => p.id === id);
+        }
+
+        function getActivePrompt() {
+          return findPrompt(activePromptId);
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderUI() {
+          renderDropdown();
+          renderContent();
+        }
+
+        function renderDropdown() {
+          promptDropdownMenu.innerHTML = "";
+          const activePrompt = getActivePrompt();
+          if (activePrompt) {
+            promptDropdownBtn.textContent = activePrompt.tabName;
+          } else {
+            promptDropdownBtn.textContent = "Выберите промпт";
+          }
+          
+          prompts.forEach((prompt) => {
+            const isActive = prompt.id === activePromptId;
+            const itemHTML = `
+              <li><a class="dropdown-item ${isActive ? 'active' : ''}" href="#" data-id="${prompt.id}">${prompt.tabName}</a></li>
+            `;
+            promptDropdownMenu.insertAdjacentHTML("beforeend", itemHTML);
+          });
+          
+          promptDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+              e.preventDefault();
+              activePromptId = e.target.dataset.id;
+              renderUI();
+            });
+          });
+        }
+
+        function renderContent() {
+          promptTabContentEl.innerHTML = "";
+          const activePrompt = getActivePrompt();
+
+          if (!activePrompt) {
+            promptTabContentEl.innerHTML = `
+              <div class="tab-pane fade show active" id="no-prompt-selected">
+                <p class="text-muted text-center py-5">
+                  Выберите промпт из списка, или создайте новый.
+                </p>
+              </div>
+            `;
+            return;
+          }
+
+          const variationsHTML = activePrompt.variations
+            .map(
+              (variation) => `
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">${variation.title}</h5>
+                    <p class="card-text text-muted flex-grow-1">
+                      ${variation.text}
+                    </p>
+                    <div class="mt-auto d-flex justify-content-end gap-2">
+                      <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-target="#variation-${variation.id}">
+                        <i class="bi-clipboard"></i>
+                        <span class="d-lg-none d-xl-inline">Копировать</span>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary edit-btn" data-id="${activePrompt.id}" data-variation-id="${variation.id}">
+                        <i class="bi-pencil"></i>
+                        <span class="d-lg-none d-xl-inline">Редактировать</span>
+                      </button>
+                    </div>
+                    <textarea id="variation-${variation.id}" class="d-none">${variation.text}</textarea>
+                  </div>
+                </div>
+              </div>
+            `
+            )
+            .join("");
+
+          const tabContentHTML = `
+            <div
+              class="tab-pane fade show active"
+              id="content-${activePrompt.id}"
+              role="tabpanel"
+            >
+              <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-sm btn-outline-secondary me-2 edit-btn" data-id="${activePrompt.id}" data-variation-id="">
+                  <i class="bi-pencil-fill"></i>
+                  <span class="d-none d-lg-inline ms-1">Редактировать</span>
+                </button>
+                ${
+                  !activePrompt.isDefault
+                    ? `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${activePrompt.id}">
+                          <i class="bi-trash"></i>
+                          <span class="d-none d-lg-inline ms-1">Удалить</span>
+                      </button>`
+                    : ""
                 }
-            ];
-            
-            // --- DATA FUNCTIONS ---
-            function loadPrompts() {
-                const storedPrompts = localStorage.getItem(STORAGE_KEY);
-                if (!storedPrompts || JSON.parse(storedPrompts).length === 0) {
-                    prompts = defaultPrompts;
-                    savePrompts();
-                } else {
-                    prompts = JSON.parse(storedPrompts);
+              </div>
+              <div class="row g-3">
+                ${variationsHTML}
+              </div>
+            </div>
+          `;
+          promptTabContentEl.insertAdjacentHTML("beforeend", tabContentHTML);
+        }
+
+        // --- EVENT LISTENERS (DELEGATED) ---
+        function addEventListenersToControls() {
+            // Используем делегирование событий на родительском контейнере
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('.edit-btn, .delete-btn, .copy-btn');
+                if (!target) return;
+
+                // Клик на кнопке редактирования промпта/вариации
+                if (target.classList.contains('edit-btn')) {
+                    const promptId = target.dataset.id;
+                    const variationId = target.dataset.variationId;
+                    handleEdit(promptId, variationId);
                 }
-            }
-
-            function savePrompts() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
-            }
-
-            // --- RENDER FUNCTIONS ---
-            function render() {
-                const desktopTabsContainer = document.getElementById('prompt-tabs');
-                const mobileTabsContainer = document.querySelector('#navbarNav .navbar-nav');
-                const tabContentContainer = document.getElementById('prompt-tab-content');
-
-                desktopTabsContainer.innerHTML = '';
-                mobileTabsContainer.innerHTML = '';
-                tabContentContainer.innerHTML = '';
                 
-                if (prompts.length === 0) {
-                     tabContentContainer.innerHTML = `<div class="text-center p-5"><p class="text-muted">У вас пока нет ни одного промпта. Нажмите "Добавить промпт", чтобы начать.</p></div>`;
-                     return;
+                // Клик на кнопке удаления промпта
+                else if (target.classList.contains('delete-btn')) {
+                    const promptId = target.dataset.id;
+                    handleDelete(promptId);
                 }
 
-                prompts.forEach((prompt, index) => {
-                    const isActive = index === 0;
+                // Клик на кнопке копирования
+                else if (target.classList.contains('copy-btn')) {
+                    const targetId = target.dataset.clipboardTarget;
+                    const textToCopy = document.querySelector(targetId).value;
+
+                    // Создаем временное поле для копирования
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = textToCopy;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
                     
-                    const controlsHTML = prompt.isDefault ? '' : `
-                        <span class="tab-controls">
-                            <i class="bi bi-pencil-square edit-btn" data-id="${prompt.id}" title="Редактировать"></i>
-                            <i class="bi bi-x-lg delete-btn" data-id="${prompt.id}" title="Удалить"></i>
-                        </span>
-                    `;
-
-                    const desktopTab = `
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link ${isActive ? 'active' : ''}" id="tab-${prompt.id}" data-bs-toggle="tab" data-bs-target="#pane-${prompt.id}" type="button" role="tab">${prompt.tabName} ${controlsHTML}</button>
-                        </li>`;
-                    desktopTabsContainer.insertAdjacentHTML('beforeend', desktopTab);
+                    try {
+                        document.execCommand('copy');
+                        copyToast.show();
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                    }
                     
-                    const mobileTab = `
-                        <li class="nav-item d-lg-none">
-                            <a class="nav-link ${isActive ? 'active' : ''}" href="#" id="mobile-tab-${prompt.id}" data-bs-toggle="tab" data-bs-target="#pane-${prompt.id}">${prompt.tabName} ${controlsHTML}</a>
-                        </li>
-                    `;
-                    mobileTabsContainer.insertAdjacentHTML('beforeend', mobileTab);
-
-                    let variationsHTML = '<div class="row g-4">';
-                    prompt.variations.forEach((variation, i) => {
-                        const uniqueId = `prompt-text-${prompt.id}-${i}`;
-                        variationsHTML += `
-                            <div class="col-lg-4 col-md-6 col-12 d-flex">
-                                <div class="card prompt-card w-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title">${variation.title || 'Вариант ' + (i+1)}</h6>
-                                        <pre class="card-text flex-grow-1" id="${uniqueId}">${variation.text || ''}</pre>
-                                        <div class="text-end mt-2">
-                                            <span class="copy-btn text-muted" data-clipboard-target="#${uniqueId}">
-                                                <i class="bi bi-clipboard"></i> Копировать
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                    variationsHTML += '</div>';
-
-                    const tabPane = `
-                        <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="pane-${prompt.id}" role="tabpanel" tabindex="0">
-                            <h2 class="h4 mb-3 d-lg-none">${prompt.tabName}</h2>
-                            ${variationsHTML}
-                        </div>`;
-                    tabContentContainer.insertAdjacentHTML('beforeend', tabPane);
-                });
-                
-                addEventListenersToControls();
-            }
-
-            function addEventListenersToControls() {
-                // Edit buttons
-                document.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); handleEdit(e.currentTarget.dataset.id); });
-                });
-
-                // Delete buttons
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); handleDelete(e.currentTarget.dataset.id); });
-                });
-
-                // Copy buttons
-                document.querySelectorAll('.copy-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const targetSelector = e.currentTarget.dataset.clipboardTarget;
-                        const textToCopy = document.querySelector(targetSelector).innerText;
-                        navigator.clipboard.writeText(textToCopy).then(() => copyToast.show());
-                    });
-                });
-                
-                // *** НОВОЕ РЕШЕНИЕ ДЛЯ МОБИЛЬНОГО МЕНЮ ***
-                // 1. Обработка кликов по мобильным вкладкам
-                document.querySelectorAll('#navbarNav .nav-link[data-bs-toggle="tab"]').forEach(mobileTab => {
-                    mobileTab.addEventListener('click', (e) => {
-                        e.preventDefault(); // Предотвращаем стандартное поведение ссылки
-
-                        const targetPaneId = mobileTab.getAttribute('data-bs-target');
-                        const desktopTabEl = document.querySelector(`.nav-tabs .nav-link[data-bs-target="${targetPaneId}"]`);
-
-                        if (desktopTabEl) {
-                            // Программно активируем вкладку через JS API Bootstrap
-                            const tab = new bootstrap.Tab(desktopTabEl);
-                            tab.show();
-                        }
-                        
-                        // Надежно закрываем меню после клика
-                        if (navbarCollapseEl.classList.contains('show')) {
-                            bsCollapse.hide();
-                        }
-                    });
-                });
-
-                // 2. Синхронизация состояния, если пользователь кликает по десктопной вкладке
-                document.querySelectorAll('#prompt-tabs .nav-link[data-bs-toggle="tab"]').forEach(desktopTab => {
-                    desktopTab.addEventListener('show.bs.tab', (e) => {
-                        // e.target - новая активная вкладка (десктопная)
-                        // e.relatedTarget - предыдущая активная вкладка (десктопная)
-                        const newTargetId = e.target.getAttribute('data-bs-target');
-                        const oldTargetId = e.relatedTarget ? e.relatedTarget.getAttribute('data-bs-target') : null;
-
-                        if (oldTargetId) {
-                            document.querySelector(`#navbarNav a.nav-link[data-bs-target="${oldTargetId}"]`)?.classList.remove('active');
-                        }
-                        document.querySelector(`#navbarNav a.nav-link[data-bs-target="${newTargetId}"]`)?.classList.add('active');
-                    });
-                });
-            }
-
-            // --- EVENT HANDLERS ---
-            function handleAdd() {
-                promptForm.reset();
-                promptIdInput.value = '';
-                document.getElementById('promptModalLabel').textContent = 'Добавить новый промпт';
-                promptTabNameInput.classList.remove('is-invalid');
-                promptModal.show();
-            }
-
-            function handleEdit(id) {
-                const prompt = prompts.find(p => p.id === id);
-                if (!prompt) return;
-
-                promptForm.reset();
-                promptIdInput.value = prompt.id;
-                promptTabNameInput.value = prompt.tabName;
-                document.getElementById('promptModalLabel').textContent = 'Редактировать промпт';
-
-                prompt.variations.forEach((v, i) => {
-                    document.getElementById(`promptTitle${i+1}`).value = v.title;
-                    document.getElementById(`promptText${i+1}`).value = v.text;
-                });
-                promptTabNameInput.classList.remove('is-invalid');
-                promptModal.show();
-            }
-
-            function handleDelete(id) {
-                promptIdToDelete = id;
-                deleteConfirmModal.show();
-            }
-
-            // --- ACTIONS ---
-            function savePrompt() {
-                const tabName = promptTabNameInput.value.trim();
-                if (!tabName) {
-                    promptTabNameInput.classList.add('is-invalid');
-                    return;
+                    document.body.removeChild(tempInput);
                 }
-                promptTabNameInput.classList.remove('is-invalid');
-
-                const id = promptIdInput.value;
-                const variations = [];
-                for (let i = 1; i <= 3; i++) {
-                    variations.push({
-                        title: document.getElementById(`promptTitle${i}`).value.trim(),
-                        text: document.getElementById(`promptText${i}`).value.trim()
-                    });
-                }
-                
-                let newPromptId = '';
-
-                if (id) { // Editing
-                    const index = prompts.findIndex(p => p.id === id);
-                    if (index > -1) {
-                        prompts[index].tabName = tabName;
-                        prompts[index].variations = variations;
-                    }
-                } else { // Creating
-                    newPromptId = `prompt-${Date.now()}`;
-                    prompts.push({ id: newPromptId, tabName, variations, isDefault: false });
-                }
-
-                savePrompts();
-                render();
-                promptModal.hide();
-                
-                if (newPromptId) {
-                    const newTabEl = document.getElementById(`tab-${newPromptId}`);
-                    if(newTabEl) {
-                        const tab = new bootstrap.Tab(newTabEl);
-                        tab.show();
-                    }
-                }
-            }
-
-            function deletePrompt() {
-                if (!promptIdToDelete) return;
-                prompts = prompts.filter(p => p.id !== promptIdToDelete);
-                savePrompts();
-                render();
-                deleteConfirmModal.hide();
-                promptIdToDelete = null;
-            }
-            
-            // --- INITIALIZATION ---
-            addPromptBtn.addEventListener('click', handleAdd);
-            savePromptBtn.addEventListener('click', savePrompt);
-            confirmDeleteBtn.addEventListener('click', deletePrompt);
-            
-            promptTabNameInput.addEventListener('input', () => {
-                promptTabNameInput.classList.toggle('is-invalid', !promptTabNameInput.value.trim());
             });
 
-            loadPrompts();
-            render();
-        });
-    </script>
+            // Слушатель для кнопки сохранения промпта в модальном окне
+            savePromptBtn.addEventListener('click', savePrompt);
+        }
 
-</body>
+        // --- HANDLERS ---
+        function handleAdd() {
+          promptIdToEdit = null;
+          document.getElementById("promptModalLabel").textContent = "Новый промпт";
+          document.getElementById("promptTabNameInput").value = "";
+          renderVariationsForm(); 
+          promptModal.show();
+        }
+
+        function handleEdit(id, variationId = null) {
+          const promptToEdit = findPrompt(id);
+          if (!promptToEdit) return;
+
+          promptIdToEdit = id;
+          document.getElementById("promptModalLabel").textContent = `Редактировать: ${promptToEdit.tabName}`;
+          document.getElementById("promptTabNameInput").value = promptToEdit.tabName;
+
+          if (variationId) {
+            const variation = promptToEdit.variations.find(v => v.id === variationId);
+            renderVariationsForm([variation]);
+          } else {
+            renderVariationsForm(promptToEdit.variations);
+          }
+          
+          promptModal.show();
+        }
+
+        function handleDelete(id) {
+            promptIdToDelete = id;
+            deleteConfirmModal.show();
+        }
+
+        function renderVariationsForm(variations = [{ title: "", text: "" }]) {
+          const variationsContainer = document.getElementById("variationsContainer");
+          variationsContainer.innerHTML = "";
+
+          variations.forEach((variation, index) => {
+            const variationHTML = `
+              <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label for="variationTitle${index}" class="form-label mb-0">Заголовок</label>
+                  <button type="button" class="btn btn-sm btn-outline-danger delete-variation-btn" data-index="${index}">
+                      <i class="bi-trash"></i>
+                  </button>
+                </div>
+                <div>
+                  <input type="text" class="form-control variation-title" id="variationTitle${index}" value="${variation.title}" data-index="${index}" required />
+                </div>
+                <div class="mt-2">
+                  <label for="variationText${index}" class="form-label">Текст промпта</label>
+                  <textarea class="form-control variation-text" id="variationText${index}" rows="3" data-index="${index}" required>${variation.text}</textarea>
+                </div>
+              </div>
+            `;
+            variationsContainer.insertAdjacentHTML("beforeend", variationHTML);
+          });
+          addDeleteVariationListeners();
+        }
+        
+        function addVariationField() {
+            const variationsContainer = document.getElementById('variationsContainer');
+            const variationCount = document.querySelectorAll('.variation-title').length;
+            const newVariationHTML = `
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="variationTitle${variationCount}" class="form-label mb-0">Заголовок</label>
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-variation-btn" data-index="${variationCount}">
+                            <i class="bi-trash"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control variation-title" id="variationTitle${variationCount}" data-index="${variationCount}" required />
+                    </div>
+                    <div class="mt-2">
+                        <label for="variationText${variationCount}" class="form-label">Текст промпта</label>
+                        <textarea class="form-control variation-text" id="variationText${variationCount}" rows="3" data-index="${variationCount}" required></textarea>
+                    </div>
+                </div>
+            `;
+            variationsContainer.insertAdjacentHTML('beforeend', newVariationHTML);
+            addDeleteVariationListeners();
+        }
+
+        function addDeleteVariationListeners() {
+            document.querySelectorAll('.delete-variation-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const variationCard = e.target.closest('.card');
+                    if (variationCard) {
+                        variationCard.remove();
+                    }
+                });
+            });
+        }
+
+        function savePrompt() {
+          const promptTabNameInput = document.getElementById("promptTabNameInput");
+          const promptTabName = promptTabNameInput.value.trim();
+
+          if (!promptTabName) {
+            promptTabNameInput.classList.add("is-invalid");
+            return;
+          }
+
+          promptTabNameInput.classList.remove("is-invalid");
+          
+          const variationTitles = document.querySelectorAll(".variation-title");
+          const variationTexts = document.querySelectorAll(".variation-text");
+          const variations = [];
+
+          let hasError = false;
+          variationTitles.forEach((titleInput, index) => {
+            const title = titleInput.value.trim();
+            const text = variationTexts[index].value.trim();
+            if (!title || !text) {
+              titleInput.classList.add("is-invalid");
+              variationTexts[index].classList.add("is-invalid");
+              hasError = true;
+            } else {
+              titleInput.classList.remove("is-invalid");
+              variationTexts[index].classList.remove("is-invalid");
+              const existingId = promptIdToEdit && findPrompt(promptIdToEdit).variations[index] ? findPrompt(promptIdToEdit).variations[index].id : null;
+              variations.push({
+                id: existingId || `v${Date.now() + Math.random().toString(36).substring(2, 5)}`,
+                title,
+                text,
+              });
+            }
+          });
+
+          if (hasError) {
+              return;
+          }
+
+          if (promptIdToEdit) {
+            const existingPrompt = findPrompt(promptIdToEdit);
+            if (existingPrompt) {
+              existingPrompt.tabName = promptTabName;
+              existingPrompt.variations = variations;
+              activePromptId = existingPrompt.id;
+            }
+          } else {
+            const newPromptId = `p${Date.now() + Math.random().toString(36).substring(2, 5)}`;
+            prompts.push({ id: newPromptId, tabName: promptTabName, variations, isDefault: false });
+            activePromptId = newPromptId;
+          }
+
+          savePrompts();
+          renderUI();
+          promptModal.hide();
+        }
+
+        function deletePrompt() {
+          if (!promptIdToDelete) return;
+          prompts = prompts.filter(p => p.id !== promptIdToDelete);
+          savePrompts();
+          if (prompts.length > 0) {
+            activePromptId = prompts[0].id;
+          } else {
+            activePromptId = null;
+          }
+          renderUI();
+          deleteConfirmModal.hide();
+          promptIdToDelete = null;
+        }
+
+        // --- INITIALIZATION ---
+        addPromptBtn.addEventListener('click', handleAdd);
+        confirmDeleteBtn.addEventListener('click', deletePrompt);
+        addVariationBtn.addEventListener('click', addVariationField);
+
+        // Слушатель для валидации названия промпта
+        promptTabNameInput.addEventListener('input', () => {
+          promptTabNameInput.classList.toggle('is-invalid', !promptTabNameInput.value.trim());
+        });
+
+        // Запуск функции, которая добавляет обработчики событий для кнопок "Сохранить", "Копировать" и "Редактировать"
+        addEventListenersToControls();
+
+        loadPrompts();
+        renderUI();
+      });
+    </script>
+  </body>
 </html>
