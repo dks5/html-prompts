@@ -1,0 +1,580 @@
+html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер Промптов</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #34568B; /* Сине-серый */
+            --secondary-color: #6c757d; /* Серый */
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+        }
+
+        .nav-tabs .nav-link {
+            border: 1px solid transparent;
+            border-bottom: none;
+            color: var(--secondary-color);
+            margin-bottom: -1px; /* Компенсация границы контейнера */
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: var(--light-bg);
+            border-color: var(--border-color) var(--border-color) var(--light-bg);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            padding: 1.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .tab-content {
+                border: none;
+                padding: 0;
+                background-color: transparent;
+            }
+        }
+
+        .prompt-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            height: 100%;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .prompt-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-card .card-body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .prompt-card .card-text {
+            white-space: pre-wrap;
+            background-color: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            flex-grow: 1;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .tab-controls {
+            display: inline-flex;
+            gap: 8px;
+            margin-left: 10px;
+            font-size: 0.8em;
+        }
+        .tab-controls i {
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .tab-controls .edit-btn:hover {
+            background-color: #ffc107; /* warning */
+            color: white;
+        }
+        .tab-controls .delete-btn:hover {
+            background-color: #dc3545; /* danger */
+            color: white;
+        }
+        
+        .copy-btn {
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 991.98px) {
+            .nav-tabs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-tabs .nav-item {
+                width: 100%;
+            }
+            .nav-tabs .nav-link {
+                 text-align: left;
+                 border-bottom: 1px solid var(--border-color);
+                 margin-bottom: 0;
+            }
+            .nav-tabs .nav-link.active {
+                border-color: var(--border-color);
+                border-left: 3px solid var(--primary-color);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-robot" style="color: var(--primary-color);"></i>
+                Менеджер Промптов
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Navigation tabs will be inserted here by JS -->
+                </ul>
+                <button id="addPromptBtn" class="btn btn-primary ms-lg-2 mt-2 mt-lg-0">
+                    <i class="bi bi-plus-lg"></i> Добавить промпт
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mt-4">
+        <!-- Tab navigation placeholder for desktop -->
+        <ul class="nav nav-tabs d-none d-lg-flex" id="prompt-tabs" role="tablist">
+            <!-- Tabs will be dynamically inserted here -->
+        </ul>
+        <!-- Tab content placeholder -->
+        <div class="tab-content" id="prompt-tab-content">
+            <!-- Tab panes will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <!-- Modals and Toasts here... -->
+    <!-- Modal for Add/Edit Prompt -->
+    <div class="modal fade" id="promptModal" tabindex="-1" aria-labelledby="promptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="promptModalLabel">Добавить новый промпт</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="promptForm">
+                        <input type="hidden" id="promptId">
+                        <div class="mb-3">
+                            <label for="promptTabName" class="form-label">Название закладки*</label>
+                            <input type="text" class="form-control" id="promptTabName" required placeholder="Например, 'Генерация кода'">
+                            <div class="invalid-feedback">Название закладки не может быть пустым.</div>
+                        </div>
+                        <hr>
+                        <!-- Prompt Variations -->
+                        <div class="row">
+                            <div class="col-lg-4 mb-3">
+                                <h6>Вариант 1</h6>
+                                <div class="mb-2">
+                                    <label for="promptTitle1" class="form-label">Заголовок</label>
+                                    <input type="text" class="form-control" id="promptTitle1" placeholder="Заголовок варианта 1">
+                                </div>
+                                <div>
+                                    <label for="promptText1" class="form-label">Текст промпта</label>
+                                    <textarea class="form-control" id="promptText1" rows="10" placeholder="Текст промпта для варианта 1"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <h6>Вариант 2</h6>
+                                <div class="mb-2">
+                                    <label for="promptTitle2" class="form-label">Заголовок</label>
+                                    <input type="text" class="form-control" id="promptTitle2" placeholder="Заголовок варианта 2">
+                                </div>
+                                <div>
+                                    <label for="promptText2" class="form-label">Текст промпта</label>
+                                    <textarea class="form-control" id="promptText2" rows="10" placeholder="Текст промпта для варианта 2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <h6>Вариант 3</h6>
+                                <div class="mb-2">
+                                    <label for="promptTitle3" class="form-label">Заголовок</label>
+                                    <input type="text" class="form-control" id="promptTitle3" placeholder="Заголовок варианта 3">
+                                </div>
+                                <div>
+                                    <label for="promptText3" class="form-label">Текст промпта</label>
+                                    <textarea class="form-control" id="promptText3" rows="10" placeholder="Текст промпта для варианта 3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" id="savePromptBtn" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить этот промпт? Это действие необратимо.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Уведомление</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          Текст промпта скопирован в буфер обмена.
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Custom App Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const addPromptBtn = document.getElementById('addPromptBtn');
+            const savePromptBtn = document.getElementById('savePromptBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const navbarCollapseEl = document.getElementById('navbarNav');
+            
+            // Modals and Components
+            const promptModal = new bootstrap.Modal(document.getElementById('promptModal'));
+            const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            const copyToast = new bootstrap.Toast(document.getElementById('copyToast'));
+            const bsCollapse = new bootstrap.Collapse(navbarCollapseEl, { toggle: false });
+
+            // Form elements
+            const promptForm = document.getElementById('promptForm');
+            const promptIdInput = document.getElementById('promptId');
+            const promptTabNameInput = document.getElementById('promptTabName');
+
+            const STORAGE_KEY = 'promptManagerData';
+            let prompts = [];
+            let promptIdToDelete = null;
+
+            const defaultPrompts = [
+                 {
+                    id: 'default-1',
+                    tabName: 'Транскрипция текста',
+                    isDefault: true,
+                    variations: [
+                        { title: 'Вариант 1: Сбалансированный', text: 'Текст промпта 1.1' },
+                        { title: 'Вариант 2: Лаконичный', text: 'Текст промпта 1.2' },
+                        { title: 'Вариант 3: Максимальный контроль', text: 'Текст промпта 1.3' }
+                    ]
+                },
+                {
+                    id: 'default-2',
+                    tabName: 'Форматирование текста',
+                    isDefault: true,
+                    variations: [
+                        { title: 'Вариант 1: Максимальная читаемость', text: 'Текст промпта 2.1' },
+                        { title: 'Вариант 2: Эффектная подача', text: 'Текст промпта 2.2' },
+                        { title: 'Вариант 3: Сбалансированный', text: 'Текст промпта 2.3' }
+                    ]
+                }
+            ];
+            
+            // --- DATA FUNCTIONS ---
+            function loadPrompts() {
+                const storedPrompts = localStorage.getItem(STORAGE_KEY);
+                if (!storedPrompts || JSON.parse(storedPrompts).length === 0) {
+                    prompts = defaultPrompts;
+                    savePrompts();
+                } else {
+                    prompts = JSON.parse(storedPrompts);
+                }
+            }
+
+            function savePrompts() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+            }
+
+            // --- RENDER FUNCTIONS ---
+            function render() {
+                const desktopTabsContainer = document.getElementById('prompt-tabs');
+                const mobileTabsContainer = document.querySelector('#navbarNav .navbar-nav');
+                const tabContentContainer = document.getElementById('prompt-tab-content');
+
+                desktopTabsContainer.innerHTML = '';
+                mobileTabsContainer.innerHTML = '';
+                tabContentContainer.innerHTML = '';
+                
+                if (prompts.length === 0) {
+                     tabContentContainer.innerHTML = `<div class="text-center p-5"><p class="text-muted">У вас пока нет ни одного промпта. Нажмите "Добавить промпт", чтобы начать.</p></div>`;
+                     return;
+                }
+
+                prompts.forEach((prompt, index) => {
+                    const isActive = index === 0;
+                    
+                    const controlsHTML = prompt.isDefault ? '' : `
+                        <span class="tab-controls">
+                            <i class="bi bi-pencil-square edit-btn" data-id="${prompt.id}" title="Редактировать"></i>
+                            <i class="bi bi-x-lg delete-btn" data-id="${prompt.id}" title="Удалить"></i>
+                        </span>
+                    `;
+
+                    const desktopTab = `
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link ${isActive ? 'active' : ''}" id="tab-${prompt.id}" data-bs-toggle="tab" data-bs-target="#pane-${prompt.id}" type="button" role="tab">${prompt.tabName} ${controlsHTML}</button>
+                        </li>`;
+                    desktopTabsContainer.insertAdjacentHTML('beforeend', desktopTab);
+                    
+                    const mobileTab = `
+                        <li class="nav-item d-lg-none">
+                            <a class="nav-link ${isActive ? 'active' : ''}" href="#" id="mobile-tab-${prompt.id}" data-bs-toggle="tab" data-bs-target="#pane-${prompt.id}">${prompt.tabName} ${controlsHTML}</a>
+                        </li>
+                    `;
+                    mobileTabsContainer.insertAdjacentHTML('beforeend', mobileTab);
+
+                    let variationsHTML = '<div class="row g-4">';
+                    prompt.variations.forEach((variation, i) => {
+                        const uniqueId = `prompt-text-${prompt.id}-${i}`;
+                        variationsHTML += `
+                            <div class="col-lg-4 col-md-6 col-12 d-flex">
+                                <div class="card prompt-card w-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">${variation.title || 'Вариант ' + (i+1)}</h6>
+                                        <pre class="card-text flex-grow-1" id="${uniqueId}">${variation.text || ''}</pre>
+                                        <div class="text-end mt-2">
+                                            <span class="copy-btn text-muted" data-clipboard-target="#${uniqueId}">
+                                                <i class="bi bi-clipboard"></i> Копировать
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    variationsHTML += '</div>';
+
+                    const tabPane = `
+                        <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="pane-${prompt.id}" role="tabpanel" tabindex="0">
+                            <h2 class="h4 mb-3 d-lg-none">${prompt.tabName}</h2>
+                            ${variationsHTML}
+                        </div>`;
+                    tabContentContainer.insertAdjacentHTML('beforeend', tabPane);
+                });
+                
+                addEventListenersToControls();
+            }
+
+            function addEventListenersToControls() {
+                // Edit buttons
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); handleEdit(e.currentTarget.dataset.id); });
+                });
+
+                // Delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => { e.stopPropagation(); handleDelete(e.currentTarget.dataset.id); });
+                });
+
+                // Copy buttons
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const targetSelector = e.currentTarget.dataset.clipboardTarget;
+                        const textToCopy = document.querySelector(targetSelector).innerText;
+                        navigator.clipboard.writeText(textToCopy).then(() => copyToast.show());
+                    });
+                });
+                
+                // *** НОВОЕ РЕШЕНИЕ ДЛЯ МОБИЛЬНОГО МЕНЮ ***
+                // 1. Обработка кликов по мобильным вкладкам
+                document.querySelectorAll('#navbarNav .nav-link[data-bs-toggle="tab"]').forEach(mobileTab => {
+                    mobileTab.addEventListener('click', (e) => {
+                        e.preventDefault(); // Предотвращаем стандартное поведение ссылки
+
+                        const targetPaneId = mobileTab.getAttribute('data-bs-target');
+                        const desktopTabEl = document.querySelector(`.nav-tabs .nav-link[data-bs-target="${targetPaneId}"]`);
+
+                        if (desktopTabEl) {
+                            // Программно активируем вкладку через JS API Bootstrap
+                            const tab = new bootstrap.Tab(desktopTabEl);
+                            tab.show();
+                        }
+                        
+                        // Надежно закрываем меню после клика
+                        if (navbarCollapseEl.classList.contains('show')) {
+                            bsCollapse.hide();
+                        }
+                    });
+                });
+
+                // 2. Синхронизация состояния, если пользователь кликает по десктопной вкладке
+                document.querySelectorAll('#prompt-tabs .nav-link[data-bs-toggle="tab"]').forEach(desktopTab => {
+                    desktopTab.addEventListener('show.bs.tab', (e) => {
+                        // e.target - новая активная вкладка (десктопная)
+                        // e.relatedTarget - предыдущая активная вкладка (десктопная)
+                        const newTargetId = e.target.getAttribute('data-bs-target');
+                        const oldTargetId = e.relatedTarget ? e.relatedTarget.getAttribute('data-bs-target') : null;
+
+                        if (oldTargetId) {
+                            document.querySelector(`#navbarNav a.nav-link[data-bs-target="${oldTargetId}"]`)?.classList.remove('active');
+                        }
+                        document.querySelector(`#navbarNav a.nav-link[data-bs-target="${newTargetId}"]`)?.classList.add('active');
+                    });
+                });
+            }
+
+            // --- EVENT HANDLERS ---
+            function handleAdd() {
+                promptForm.reset();
+                promptIdInput.value = '';
+                document.getElementById('promptModalLabel').textContent = 'Добавить новый промпт';
+                promptTabNameInput.classList.remove('is-invalid');
+                promptModal.show();
+            }
+
+            function handleEdit(id) {
+                const prompt = prompts.find(p => p.id === id);
+                if (!prompt) return;
+
+                promptForm.reset();
+                promptIdInput.value = prompt.id;
+                promptTabNameInput.value = prompt.tabName;
+                document.getElementById('promptModalLabel').textContent = 'Редактировать промпт';
+
+                prompt.variations.forEach((v, i) => {
+                    document.getElementById(`promptTitle${i+1}`).value = v.title;
+                    document.getElementById(`promptText${i+1}`).value = v.text;
+                });
+                promptTabNameInput.classList.remove('is-invalid');
+                promptModal.show();
+            }
+
+            function handleDelete(id) {
+                promptIdToDelete = id;
+                deleteConfirmModal.show();
+            }
+
+            // --- ACTIONS ---
+            function savePrompt() {
+                const tabName = promptTabNameInput.value.trim();
+                if (!tabName) {
+                    promptTabNameInput.classList.add('is-invalid');
+                    return;
+                }
+                promptTabNameInput.classList.remove('is-invalid');
+
+                const id = promptIdInput.value;
+                const variations = [];
+                for (let i = 1; i <= 3; i++) {
+                    variations.push({
+                        title: document.getElementById(`promptTitle${i}`).value.trim(),
+                        text: document.getElementById(`promptText${i}`).value.trim()
+                    });
+                }
+                
+                let newPromptId = '';
+
+                if (id) { // Editing
+                    const index = prompts.findIndex(p => p.id === id);
+                    if (index > -1) {
+                        prompts[index].tabName = tabName;
+                        prompts[index].variations = variations;
+                    }
+                } else { // Creating
+                    newPromptId = `prompt-${Date.now()}`;
+                    prompts.push({ id: newPromptId, tabName, variations, isDefault: false });
+                }
+
+                savePrompts();
+                render();
+                promptModal.hide();
+                
+                if (newPromptId) {
+                    const newTabEl = document.getElementById(`tab-${newPromptId}`);
+                    if(newTabEl) {
+                        const tab = new bootstrap.Tab(newTabEl);
+                        tab.show();
+                    }
+                }
+            }
+
+            function deletePrompt() {
+                if (!promptIdToDelete) return;
+                prompts = prompts.filter(p => p.id !== promptIdToDelete);
+                savePrompts();
+                render();
+                deleteConfirmModal.hide();
+                promptIdToDelete = null;
+            }
+            
+            // --- INITIALIZATION ---
+            addPromptBtn.addEventListener('click', handleAdd);
+            savePromptBtn.addEventListener('click', savePrompt);
+            confirmDeleteBtn.addEventListener('click', deletePrompt);
+            
+            promptTabNameInput.addEventListener('input', () => {
+                promptTabNameInput.classList.toggle('is-invalid', !promptTabNameInput.value.trim());
+            });
+
+            loadPrompts();
+            render();
+        });
+    </script>
+
+</body>
+</html>
