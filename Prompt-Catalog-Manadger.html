@@ -69,6 +69,15 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         height: 100%;
       }
+      
+      /* --- ИЗМЕНЕНИЕ ЗДЕСЬ --- */
+      .card .card-title {
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+      }
 
       .prompt-card .card-text {
         min-height: 80px;
@@ -641,22 +650,30 @@
 
                 // Клик на кнопке копирования
                 else if (target.classList.contains('copy-btn')) {
-                    const targetId = target.dataset.clipboard-target;
-                    const textToCopy = document.querySelector(targetId).value;
+                    const targetId = target.dataset.clipboardTarget; 
+                    const textToCopyEl = document.querySelector(targetId);
+                    
+                    if (!textToCopyEl) {
+                        console.error('Target element for copying not found:', targetId);
+                        return;
+                    }
+                    const textToCopy = textToCopyEl.value;
 
-                    // Создаем временное поле для копирования
+                    // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                    // Убираем проверку на navigator.clipboard и используем только document.execCommand.
+                    // Этот метод лучше работает в iframe.
                     const tempInput = document.createElement('textarea');
                     tempInput.value = textToCopy;
+                    tempInput.style.position = 'absolute';
+                    tempInput.style.left = '-9999px';
                     document.body.appendChild(tempInput);
                     tempInput.select();
-                    
                     try {
                         document.execCommand('copy');
                         copyToast.show();
                     } catch (err) {
-                        console.error('Failed to copy text: ', err);
+                        console.error('Fallback: Oops, unable to copy', err);
                     }
-                    
                     document.body.removeChild(tempInput);
                 }
             });
@@ -750,14 +767,18 @@
 
         function addDeleteVariationListeners() {
             document.querySelectorAll('.delete-variation-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const variationCard = e.target.closest('.card');
-                    if (variationCard) {
-                        variationCard.remove();
-                    }
-                });
+                button.removeEventListener('click', deleteVariationCard); // Удаляем старые, чтобы избежать дублирования
+                button.addEventListener('click', deleteVariationCard);
             });
         }
+
+        function deleteVariationCard(e) {
+            const variationCard = e.target.closest('.card');
+            if (variationCard) {
+                variationCard.remove();
+            }
+        }
+
 
         function savePrompt() {
           const promptTabNameInput = document.getElementById("promptTabNameInput");
@@ -849,3 +870,4 @@
     </script>
   </body>
 </html>
+
