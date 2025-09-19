@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Менеджер Промптов</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    
+    <!-- Pako JS for compression -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+      :root {
+        --primary-color: #34568b; /* Сине-серый */
+        --secondary-color: #6c757d; /* Серый */
+        --light-bg: #f8f9fa;
+        --border-color: #dee2e6;
+        --card-bg: #ffffff;
+        --text-color: #212529;
+      }
+
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
+
+      .container {
+        max-width: 1200px;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      
+      .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        height: 100%;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .offcanvas-header {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .offcanvas-body .list-group-item.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .toast-container { z-index: 1100; }
+      .sync-input-group {
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 1rem;
+      }
+      #syncCodeHolder {
+        font-family: monospace;
+        font-size: 0.9rem;
+        word-break: break-all;
+        max-height: 150px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Container -->
+    <div class="container">
+      <header class="header">
+        <h1 class="mb-0">Менеджер Промптов</h1>
+        <p class="mb-0">Создавайте, храните и управляйте вашими промптами</p>
+      </header>
+
+      <main class="row">
+        <!-- Controls -->
+        <div class="col-12 mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <button class="btn btn-outline-secondary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+              <i class="bi-list"></i><span class="ms-1">Меню</span>
+            </button>
+            <div class="dropdown d-none d-md-block">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="promptDropdown" data-bs-toggle="dropdown" aria-expanded="false">Выберите промпт</button>
+              <ul class="dropdown-menu" aria-labelledby="promptDropdown" id="promptDropdownMenu"></ul>
+            </div>
+            <div class="d-flex gap-2">
+              <button id="addPromptBtn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#promptModal"><i class="bi-plus-circle-fill"></i><span class="ms-1 d-none d-sm-inline">Добавить</span></button>
+              <button id="syncBtn" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#syncModal"><i class="bi-arrow-repeat"></i><span class="ms-1 d-none d-sm-inline">Синхронизация</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prompt Content -->
+        <div class="col-12">
+          <div class="tab-content border bg-white p-4 rounded-3" id="prompt-tab-content">
+            <div class="tab-pane fade show active"><p class="text-muted text-center py-5">Выберите промпт из списка, или создайте новый.</p></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Offcanvas Menu -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+      <div class="offcanvas-header"><h5 class="offcanvas-title text-white" id="offcanvasMenuLabel">Меню промптов</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button></div>
+      <div class="offcanvas-body"><div class="list-group" id="mobilePromptList"></div></div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="promptModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title" id="promptModalLabel">Новый промпт</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <form id="promptForm">
+              <div class="mb-3"><label for="promptTabNameInput" class="form-label">Название промпта</label><input type="text" class="form-control" id="promptTabNameInput" required></div>
+              <div id="variationsContainer"><h6 class="mb-3">Вариации</h6></div>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="addVariationBtn"><i class="bi-plus-lg"></i> Добавить вариацию</button>
+            </form>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="button" class="btn btn-primary" id="savePromptBtn">Сохранить</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title">Удалить промпт</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">Вы уверены, что хотите удалить этот промпт?</div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="button" class="btn btn-danger" id="confirmDeleteBtn">Удалить</button></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="syncModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Синхронизация данных</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="sync-input-group mb-4">
+                        <p class="mb-2"><b>Шаг 1:</b> Сгенерируйте код, который содержит все ваши данные.</p>
+                        <button class="btn btn-primary" type="button" id="generateCodeBtn"><i class="bi-asterisk"></i> Генерировать код</button>
+                        <div id="codeDisplayArea" class="mt-3 d-none">
+                            <p class="small text-muted mb-1">Нажмите на блок ниже, чтобы скопировать ваш код:</p>
+                            <div class="form-control" id="syncCodeHolder" title="Нажмите, чтобы скопировать"></div>
+                        </div>
+                    </div>
+
+                    <div class="sync-input-group">
+                        <p class="mb-2"><b>Шаг 2:</b> Вставьте полученный код на этом устройстве, чтобы загрузить промпты.</p>
+                        <div class="input-group">
+                            <textarea class="form-control" placeholder="Вставьте код сюда..." id="pasteCodeInput" rows="4"></textarea>
+                            <button class="btn btn-success" type="button" id="applyCodeBtn"><i class="bi-download"></i> Загрузить</button>
+                        </div>
+                        <p class="small text-danger mt-2"><i class="bi-exclamation-triangle-fill"></i> Внимание: загрузка заменит все текущие промпты на этом устройстве.</p>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="genericToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <i class="bi-info-circle-fill me-2"></i>
+          <strong class="me-auto" id="genericToastTitle">Уведомление</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="genericToastBody"></div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Firebase JS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, addDoc, deleteDoc, writeBatch, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        document.addEventListener("DOMContentLoaded", async () => {
+          // --- CONFIG & GLOBAL VARS ---
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+          const defaultConfig = {
+              apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT_ID.firebaseapp.com", projectId: "YOUR_PROJECT_ID",
+              storageBucket: "YOUR_PROJECT_ID.appspot.com", messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
+          };
+          const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultConfig;
+          
+          let db, auth;
+          let userId = null;
+          let unsubscribeFromPrompts = null;
+          let prompts = [];
+          let promptIdToEdit = null, promptIdToDelete = null, activePromptId = null;
+
+          const defaultPrompts = [
+            { id: 'd2', tabName: "Резюмирование", isDefault: true, variations: [{ id: 'v3', title: "Краткое резюме", text: "Сделай краткое резюме следующего текста, выделив основные идеи и ключевые моменты." }, { id: 'v4', title: "Подробное резюме", text: "Сделай подробное резюме следующего текста, с акцентом на факты, детали и примеры." }] },
+            { id: 'd1', tabName: "Переводчик", isDefault: true, variations: [{ id: 'v1', title: "С английского на русский", text: "Переведи следующий текст с английского на русский язык и сохрани исходный стиль." }, { id: 'v2', title: "С русского на английский", text: "Переведи следующий текст с русского на английский язык и сохрани исходный стиль." }] },
+          ];
+
+          // --- DOM ELEMENTS ---
+          const promptDropdownBtn = document.getElementById("promptDropdown");
+          const promptDropdownMenu = document.getElementById("promptDropdownMenu");
+          const promptTabContentEl = document.getElementById("prompt-tab-content");
+          const mobilePromptList = document.getElementById("mobilePromptList");
+          const promptModal = new bootstrap.Modal(document.getElementById("promptModal"));
+          const deleteConfirmModal = new bootstrap.Modal(document.getElementById("deleteConfirmModal"));
+          const syncModal = new bootstrap.Modal(document.getElementById("syncModal"));
+          const genericToast = new bootstrap.Toast(document.getElementById("genericToast"));
+          
+          // --- UTILITY FUNCTIONS ---
+          function showToast(title, body, iconClass = 'bi-info-circle-fill') {
+            document.getElementById('genericToastTitle').textContent = title;
+            document.getElementById('genericToastBody').innerHTML = body;
+            document.querySelector('#genericToast .toast-header i').className = `me-2 ${iconClass}`;
+            genericToast.show();
+          }
+
+          // ++ ИСПРАВЛЕНИЕ: Добавлено 'async', чтобы правильно обрабатывать ошибку
+          async function copyTextWithFallback(text) {
+            try {
+              if (!navigator.clipboard) {
+                throw new Error('Clipboard API not available');
+              }
+              await navigator.clipboard.writeText(text);
+              showToast('Скопировано!', 'Код успешно скопирован в буфер обмена.', 'bi-clipboard-check-fill text-success');
+            } catch (err) {
+              console.warn('Clipboard API failed, using fallback.', err);
+              const tempTextarea = document.createElement('textarea');
+              tempTextarea.value = text;
+              tempTextarea.style.position = 'fixed'; tempTextarea.style.left = '-9999px';
+              document.body.appendChild(tempTextarea);
+              tempTextarea.select();
+              try {
+                document.execCommand('copy');
+                showToast('Скопировано!', 'Код успешно скопирован в буфер обмена.', 'bi-clipboard-check-fill text-success');
+              } catch (copyErr) {
+                showToast('Ошибка', 'Не удалось скопировать. Пожалуйста, скопируйте вручную.', 'bi-x-circle-fill text-danger');
+              } finally {
+                document.body.removeChild(tempTextarea);
+              }
+            }
+          }
+
+          // --- FIREBASE & DATA LOGIC ---
+          function initializeFirebase() {
+              try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                return true;
+              } catch (error) {
+                document.querySelector('main').innerHTML = `<p class="alert alert-danger text-center">Не удалось инициализировать Firebase. Проверьте конфигурацию.</p>`;
+                return false;
+              }
+          }
+          
+          async function signIn() {
+              if (auth.currentUser) { userId = auth.currentUser.uid; return; }
+              try {
+                  const userCredential = await signInAnonymously(auth);
+                  userId = userCredential.user.uid;
+                  console.log("Signed in anonymously. UID:", userId);
+              } catch (error) {
+                  showToast('Ошибка входа', 'Не удалось анонимно войти.', 'bi-x-circle-fill text-danger');
+              }
+          }
+
+          function setupRealtimeListener() {
+              if (unsubscribeFromPrompts) unsubscribeFromPrompts();
+              if (!userId) return; 
+              
+              const userPromptsRef = collection(db, `artifacts/${appId}/users/${userId}/prompts`);
+              unsubscribeFromPrompts = onSnapshot(userPromptsRef, (snapshot) => {
+                  const userPrompts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isDefault: false }));
+                  prompts = [...defaultPrompts, ...userPrompts];
+                  if (!prompts.find(p => p.id === activePromptId)) {
+                      activePromptId = prompts.length > 0 ? prompts[0].id : null;
+                  }
+                  renderUI();
+              }, () => { prompts = defaultPrompts; renderUI(); });
+          }
+
+          // --- CRUD Functions ---
+          async function savePromptToFirestore(prompt) { await setDoc(doc(db, `artifacts/${appId}/users/${userId}/prompts`, prompt.id), { tabName: prompt.tabName, variations: prompt.variations }); }
+          async function addPromptToFirestore(prompt) { const ref = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/prompts`), { tabName: prompt.tabName, variations: prompt.variations }); return ref.id; }
+          async function deletePromptFromFirestore(promptId) { await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/prompts`, promptId)); }
+
+          // --- UI RENDER FUNCTIONS ---
+          function renderUI() { renderDesktopDropdown(); renderMobileMenu(); renderContent(); }
+          
+          function renderDesktopDropdown() {
+            promptDropdownMenu.innerHTML = "";
+            const activePrompt = prompts.find(p => p.id === activePromptId);
+            promptDropdownBtn.textContent = activePrompt ? activePrompt.tabName : "Выберите промпт";
+            prompts.forEach(p => promptDropdownMenu.insertAdjacentHTML("beforeend", `<li><a class="dropdown-item ${p.id === activePromptId ? 'active' : ''}" href="#" data-id="${p.id}">${p.tabName}</a></li>`));
+          }
+          function renderMobileMenu() {
+            mobilePromptList.innerHTML = "";
+            prompts.forEach(p => mobilePromptList.insertAdjacentHTML("beforeend", `<a href="#" class="list-group-item list-group-item-action ${p.id === activePromptId ? 'active' : ''}" data-id="${p.id}" data-bs-dismiss="offcanvas">${p.tabName}</a>`));
+          }
+          function renderContent() {
+            promptTabContentEl.innerHTML = "";
+            const activePrompt = prompts.find(p => p.id === activePromptId);
+            if (!activePrompt) {
+              promptTabContentEl.innerHTML = `<div class="tab-pane fade show active"><p class="text-muted text-center py-5">Выберите промпт из списка.</p></div>`; return;
+            }
+            const variationsHTML = activePrompt.variations.map(v => `
+                <div class="col-md-6 mb-4">
+                  <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                      <h5 class="card-title">${v.title}</h5>
+                      <p class="card-text text-muted flex-grow-1">${v.text}</p>
+                      <div class="mt-auto d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-text="${v.text}"><i class="bi-clipboard"></i> <span class="d-none d-sm-inline">Копировать</span></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>`).join("");
+            const editDeleteControls = !activePrompt.isDefault ? `
+                <button class="btn btn-sm btn-outline-secondary me-2 edit-btn" data-id="${activePrompt.id}"><i class="bi-pencil-fill"></i> <span class="d-none d-lg-inline ms-1">Редактировать</span></button>
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${activePrompt.id}"><i class="bi-trash"></i> <span class="d-none d-lg-inline ms-1">Удалить</span></button>` : "";
+            promptTabContentEl.innerHTML = `
+              <div class="tab-pane fade show active">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="d-md-none mb-0">${activePrompt.tabName}</h5>
+                  <div class="ms-auto d-flex">${editDeleteControls}</div>
+                </div>
+                <div class="row g-3">${variationsHTML}</div>
+              </div>`;
+          }
+
+          // --- EVENT HANDLERS ---
+          function handleSavePrompt() {
+              const tabName = document.getElementById("promptTabNameInput").value.trim();
+              if (!tabName) { document.getElementById("promptTabNameInput").classList.add('is-invalid'); return; }
+              const variations = Array.from(document.querySelectorAll('.variation-field')).map(field => ({
+                  title: field.querySelector('input').value.trim(),
+                  text: field.querySelector('textarea').value.trim(),
+                  id: field.dataset.id || crypto.randomUUID(),
+              })).filter(v => v.title && v.text);
+              if (variations.length === 0) { showToast('Ошибка', 'Заполните хотя бы одну вариацию.', 'bi-exclamation-circle-fill text-warning'); return; }
+              
+              if (promptIdToEdit) {
+                  savePromptToFirestore({ id: promptIdToEdit, tabName, variations });
+              } else {
+                  addPromptToFirestore({ tabName, variations }).then(newId => { if (newId) activePromptId = newId; });
+              }
+              promptModal.hide();
+          }
+
+          function handleEditPrompt(id) {
+            promptIdToEdit = id;
+            const prompt = prompts.find(p => p.id === id);
+            if (!prompt) return;
+            document.getElementById("promptTabNameInput").value = prompt.tabName;
+            const container = document.getElementById("variationsContainer");
+            container.innerHTML = '<h6>Вариации</h6>';
+            prompt.variations.forEach(v => addVariationField(v));
+            promptModal.show();
+          }
+          
+          function addVariationField(variation = { id: '', title: "", text: "" }) {
+              const container = document.getElementById("variationsContainer");
+              const newField = document.createElement("div");
+              newField.className = "variation-field mb-3 border p-3 rounded";
+              newField.dataset.id = variation.id || crypto.randomUUID();
+              newField.innerHTML = `
+                <div class="input-group mb-2">
+                  <span class="input-group-text">Название</span>
+                  <input type="text" class="form-control" value="${variation.title}" required>
+                  <button type="button" class="btn btn-outline-danger remove-variation-btn"><i class="bi-trash"></i></button>
+                </div>
+                <div class="input-group">
+                  <span class="input-group-text">Текст</span>
+                  <textarea class="form-control" rows="4" required>${variation.text}</textarea>
+                </div>`;
+              container.appendChild(newField);
+              newField.querySelector('.remove-variation-btn').onclick = () => newField.remove();
+          }
+
+          // --- SYNC LOGIC (Client-side data compression) ---
+          function generateSyncCode() {
+            const userPrompts = prompts.filter(p => !p.isDefault);
+            if (userPrompts.length === 0) {
+              showToast('Нечего переносить', 'У вас нет пользовательских промптов для синхронизации.', 'bi-exclamation-circle-fill text-warning');
+              return;
+            }
+            try {
+              const jsonString = JSON.stringify(userPrompts);
+              const compressed = pako.deflate(jsonString);
+              const base64String = btoa(String.fromCharCode.apply(null, compressed));
+              
+              const codeHolder = document.getElementById('syncCodeHolder');
+              codeHolder.textContent = base64String;
+              document.getElementById('codeDisplayArea').classList.remove('d-none');
+              showToast('Код создан', 'Ваш код с данными готов к копированию.', 'bi-check-circle-fill text-success');
+            } catch (error) {
+              showToast('Ошибка', 'Не удалось сгенерировать код.', 'bi-x-circle-fill text-danger');
+            }
+          }
+
+          async function applySyncCode() {
+            const btn = document.getElementById('applyCodeBtn');
+            const codeInput = document.getElementById('pasteCodeInput');
+            const code = codeInput.value.trim();
+            if (!code) { showToast('Ошибка', 'Пожалуйста, введите код.', 'bi-exclamation-circle-fill text-warning'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Загрузка...`;
+
+            try {
+              const binaryString = atob(code);
+              const compressed = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i));
+              const jsonString = pako.inflate(compressed, { to: 'string' });
+              const importedPrompts = JSON.parse(jsonString);
+              
+              if (!Array.isArray(importedPrompts)) throw new Error("Invalid data format");
+
+              const batch = writeBatch(db);
+              const userPromptsRef = collection(db, `artifacts/${appId}/users/${userId}/prompts`);
+              const q = query(userPromptsRef);
+              const querySnapshot = await getDocs(q);
+              querySnapshot.forEach(d => batch.delete(d.ref));
+
+              importedPrompts.forEach(p => {
+                const newDocRef = doc(userPromptsRef);
+                batch.set(newDocRef, { tabName: p.tabName, variations: p.variations });
+              });
+
+              await batch.commit();
+              showToast('Успешно!', `<b>${importedPrompts.length}</b> промпт(ов) было загружено.`, 'bi-check-circle-fill text-success');
+              syncModal.hide();
+
+            } catch(error) {
+                showToast('Ошибка', 'Неверный код или поврежденные данные.', 'bi-x-circle-fill text-danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi-download"></i> Загрузить`;
+                codeInput.value = '';
+            }
+          }
+
+          // --- EVENT LISTENERS ---
+          function addEventListeners() {
+            document.addEventListener('click', e => {
+              const target = e.target.closest('.edit-btn, .delete-btn, .copy-btn, .dropdown-item, .list-group-item-action');
+              if (!target) return;
+
+              const id = target.dataset.id;
+              if (target.matches('.edit-btn')) handleEditPrompt(id);
+              if (target.matches('.delete-btn')) { promptIdToDelete = id; deleteConfirmModal.show(); }
+              if (target.matches('.dropdown-item, .list-group-item-action')) { e.preventDefault(); activePromptId = id; renderUI(); }
+              if (target.matches('.copy-btn')) copyTextWithFallback(target.dataset.text);
+            });
+
+            document.getElementById('savePromptBtn').onclick = handleSavePrompt;
+            document.getElementById('confirmDeleteBtn').onclick = () => { if (promptIdToDelete) { deletePromptFromFirestore(promptIdToDelete); deleteConfirmModal.hide(); } };
+            document.getElementById('addPromptBtn').onclick = () => { promptIdToEdit = null; document.getElementById("promptForm").reset(); document.getElementById("variationsContainer").innerHTML = '<h6>Вариации</h6>'; addVariationField(); promptModal.show(); };
+            document.getElementById('addVariationBtn').onclick = () => addVariationField();
+            
+            document.getElementById('generateCodeBtn').onclick = generateSyncCode;
+            document.getElementById('applyCodeBtn').onclick = applySyncCode;
+            document.getElementById('syncCodeHolder').onclick = (e) => copyTextWithFallback(e.target.textContent);
+          }
+
+          // --- INITIALIZATION ---
+          async function init() {
+            if (!initializeFirebase()) return;
+            await signIn();
+            setupRealtimeListener();
+            addEventListeners();
+          }
+
+          init();
+        });
+    </script>
+  </body>
+</html>
+
