@@ -3,20 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мастер-промпт для генерации HTML-руководства по скрипту Xray</title>
-    <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Мастер-промпт (без Bootstrap)</title>
     <style>
+        /* Базовые стили */
         body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
         }
-        .nav-tabs .nav-link {
-            color: #495057;
+        .container {
+            max-width: 900px;
+            margin: auto;
         }
-        .nav-tabs .nav-link.active {
+
+        /* Стили для карточки */
+        .card {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            padding: 0.75rem 1.25rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Стили для вкладок */
+        .tabs {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: -1px; /* Скрыть нижнюю границу карточки */
+            display: flex;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-bottom: none;
+            cursor: pointer;
+            background-color: transparent;
+            font-size: 1rem;
+        }
+        .tab-button.active {
             color: #000;
             background-color: #fff;
             border-color: #dee2e6 #dee2e6 #fff;
+            border-radius: 0.25rem 0.25rem 0 0;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active.show {
+            display: block;
+        }
+        
+        /* Стили для контента внутри вкладок */
+        .pane-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .pane-title {
+            margin: 0;
+            font-size: 1.25rem;
         }
         pre {
             background-color: #e9ecef;
@@ -25,51 +81,59 @@
             white-space: pre-wrap;
             word-wrap: break-word;
             font-size: 0.9rem;
+            color: #212529;
         }
-        .card-header-pills {
-            position: relative;
-        }
-        .action-buttons {
-            position: absolute;
-            top: 0.8rem;
-            right: 1rem;
-        }
-        .btn-sm {
+
+        /* Стили для кнопок */
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
+            border-radius: 0.25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        .btn-primary {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-success {
+            color: #fff;
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .me-2 {
+            margin-right: 0.5rem;
         }
     </style>
 </head>
 <body>
 
-<div class="container mt-4 mb-4">
-    <div class="card shadow-sm">
+<div class="container">
+    <div class="card">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs" id="promptTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-pane" type="button" role="tab" aria-controls="text-pane" aria-selected="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-text me-1" viewBox="0 0 16 16"><path d="M5 4.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 10.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg>
-                        Текстовый формат
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-pane" type="button" role="tab" aria-controls="json-pane" aria-selected="false">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-code me-1" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/><path d="M8.646 6.646a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L10.293 9 8.646 7.354a.5.5 0 0 1 0-.708zm-1.292 0a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708-.708L5.707 9l1.647-1.646a.5.5 0 0 0 0-.708z"/></svg>
-                        Формат JSON
-                    </button>
-                </li>
+            <ul class="tabs" id="promptTabs">
+                <li><button class="tab-button active" data-target="#text-pane">Промпт (Текст)</button></li>
+                <li><button class="tab-button" data-target="#json-pane">Промпт (JSON)</button></li>
+                <li><button class="tab-button" data-target="#template-pane">Шаблон оформления</button></li>
+                <li><button class="tab-button" data-target="#template-json-pane">Шаблон (JSON)</button></li>
             </ul>
         </div>
         <div class="card-body">
             <div class="tab-content" id="promptTabsContent">
                 <!-- Text Pane -->
-                <div class="tab-pane fade show active" id="text-pane" role="tabpanel" aria-labelledby="text-tab">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">Мастер-промпт (Текст)</h5>
-                        <button class="btn btn-primary btn-sm" onclick="copyContent('textPrompt')">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
-                            Копировать
-                        </button>
+                <div class="tab-pane active show" id="text-pane">
+                    <div class="pane-header">
+                        <h5 class="pane-title">Мастер-промпт (Текст)</h5>
+                        <button class="btn btn-primary" onclick="copyContent(this, 'textPrompt')">Копировать</button>
                     </div>
                     <pre><code id="textPrompt">**Роль:** Ты — опытный full-stack разработчик, специализирующийся на front-end (HTML, CSS, Bootstrap) и back-end скриптах (bash). Твоя задача — создать техническую документацию в формате интерактивной HTML-страницы.
 
@@ -86,9 +150,9 @@
 
 ---
 
-### **Содержание и структура HTML-страницы (`<body>`):**
+### **Содержание и структура HTML-страницы (&lt;body&gt;):**
 
-**Весь контент, описанный ниже в разделах, должен быть организован как содержимое для вкладок (компонент `tab-content` из Bootstrap). Каждый пронумерованный "Раздел" будет представлять собой отдельный `<div>` с классом `tab-pane`.**
+**Весь контент, описанный ниже в разделах, должен быть организован как содержимое для вкладок (компонент `tab-content` из Bootstrap). Каждый пронумерованный "Раздел" будет представлять собой отдельный `&lt;div&gt;` с классом `tab-pane`.**
 
 **Раздел 1: Панель конфигурации (Плейсхолдеры)**
 * **Задача:** Создай в самом верху страницы заметный блок (например, Bootstrap `alert` или `card`).
@@ -101,7 +165,7 @@
 
 **Раздел 2: Установка (Исходный скрипт)**
 * **Задача:** Размести полный и **немодифицированный** исходный bash-скрипт.
-* **Оформление:** Используй блок `<pre><code>...</code></pre>` для корректного отображения кода с подсветкой синтаксиса (если возможно) и кнопкой "Копировать".
+* **Оформление:** Используй блок `&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;` для корректного отображения кода с подсветкой синтаксиса (если возможно) и кнопкой "Копировать".
 * **Описание:** Под блоком с кодом дай краткое описание того, что делает скрипт на каждом этапе (обновление пакетов, установка Xray, генерация ключей, создание конфига и т.д.).
 
 **Раздел 3: Управление сервером**
@@ -133,32 +197,105 @@
 * Убедись, что предоставленные JSON-фрагменты для сценариев модернизации синтаксически корректны и полностью готовы к вставке в файл конфигурации Xray.</code></pre>
                 </div>
                 <!-- JSON Pane -->
-                <div class="tab-pane fade" id="json-pane" role="tabpanel" aria-labelledby="json-tab">
-                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">Мастер-промпт (JSON)</h5>
+                <div class="tab-pane" id="json-pane">
+                     <div class="pane-header">
+                        <h5 class="pane-title">Мастер-промпт (JSON)</h5>
                         <div>
-                            <button class="btn btn-primary btn-sm me-2" onclick="copyContent('jsonPrompt')">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
-                                Копировать
-                            </button>
-                            <button class="btn btn-success btn-sm" onclick="exportJson()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                                Экспорт
-                            </button>
+                            <button class="btn btn-primary me-2" onclick="copyContent(this, 'jsonPrompt')">Копировать</button>
+                            <button class="btn btn-success" onclick="exportJson('promptJson', 'ai_prompt.json')">Экспорт</button>
                         </div>
                     </div>
                     <pre><code id="jsonPrompt"></code></pre>
+                </div>
+                <!-- Template Pane -->
+                <div class="tab-pane" id="template-pane">
+                     <div class="pane-header">
+                        <h5 class="pane-title">Шаблон оформления</h5>
+                        <button class="btn btn-primary" onclick="copyContent(this, 'templatePrompt')">Копировать</button>
+                    </div>
+                    <pre><code id="templatePrompt">### **Концепция и стиль оформления документа**
+
+Этот документ представляет собой автономный HTML-шаблон для создания интерактивных одностраничных руководств без внешних зависимостей.
+
+**1. Общая концепция:**
+- **Формат:** Единый HTML-файл (Single-file).
+- **Технология:** Чистый HTML и CSS. Весь код является самодостаточным.
+- **Поведение:** Одностраничное приложение (SPA), где контент отображается во вкладках. Логика переключения реализована на чистом JavaScript.
+
+**2. Структура HTML:**
+- **Основной контейнер:** `&lt;div class="container"&gt;` для центрирования и отступов.
+- **Главный блок:** `&lt;div class="card"&gt;` для визуального объединения всего контента.
+- **Навигация:** Меню вкладок `&lt;ul class="tabs"&gt;` с кнопками `&lt;button class="tab-button"&gt;`.
+- **Контент:** Каждый раздел находится в своей панели `&lt;div class="tab-pane"&gt;`.
+
+**3. Стилизация (CSS):**
+- **Внутренние стили:** Полный набор CSS-правил находится внутри тега `&lt;style&gt;` в `&lt;head&gt;`. Стили имитируют внешний вид компонентов Bootstrap (карточки, кнопки, вкладки), но не используют сам фреймворк.
+
+**4. Функциональность (JavaScript):**
+- **Расположение:** Весь JS-код находится внутри тега `&lt;script&gt;` в конце документа.
+- **Переключение вкладок:** Реализовано с помощью слушателя событий `DOMContentLoaded`, который находит все кнопки вкладок и панели, а затем по клику управляет их классами `.active` и `.show`.
+- **Копирование:** Функция `copyContent()` использует надежный метод `document.execCommand('copy')` для обеспечения работы в защищенных средах.
+- **Экспорт:** Функция `exportJson()` генерирует и скачивает файл `.json`.
+- **Инициализация:** При загрузке страницы JSON-объекты автоматически форматируются и вставляются в соответствующие блоки.</code></pre>
+                </div>
+                <!-- Template JSON Pane (НОВАЯ ВКЛАДКА) -->
+                <div class="tab-pane" id="template-json-pane">
+                     <div class="pane-header">
+                        <h5 class="pane-title">Шаблон (JSON)</h5>
+                        <div>
+                            <button class="btn btn-primary me-2" onclick="copyContent(this, 'templateJsonPrompt')">Копировать</button>
+                            <button class="btn btn-success" onclick="exportJson('templateJson', 'template.json')">Экспорт</button>
+                        </div>
+                    </div>
+                    <pre><code id="templateJsonPrompt"></code></pre>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap 5 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
 <script>
-    // JSON data for the prompt
+    // --- Функции вынесены в начало скрипта для надежности ---
+
+    // Функция копирования
+    function copyContent(button, elementId) {
+        const content = document.getElementById(elementId).textContent;
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = content;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        
+        try {
+            document.execCommand('copy');
+            const originalText = button.textContent;
+            button.textContent = 'Скопировано!';
+            button.disabled = true;
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.disabled = false;
+            }, 2000);
+        } catch (err) {
+            console.error('Не удалось скопировать текст: ', err);
+        }
+
+        document.body.removeChild(tempTextArea);
+    }
+
+    // Экспорт JSON
+    function exportJson(jsonObjectName, fileName) {
+        const jsonString = JSON.stringify(window[jsonObjectName], null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // JSON-данные для Промпта
     const promptJson = {
       "role": "Ты — опытный full-stack разработчик, специализирующийся на front-end (HTML, CSS, Bootstrap) и back-end скриптах (bash). Твоя задача — создать техническую документацию в формате интерактивной HTML-страницы.",
       "mainGoal": "Создать единый (single-file) HTML-документ для руководства по установке и управлению прокси-сервером Xray с помощью предоставленного bash-скрипта. Документ должен быть современным, адаптивным и максимально функциональным для пользователя.",
@@ -238,48 +375,79 @@
       ]
     };
 
-    // Populate the JSON code block on page load
-    document.addEventListener('DOMContentLoaded', (event) => {
+    // НОВЫЙ ОБЪЕКТ ДЛЯ ЧЕТВЕРТОЙ ВКЛАДКИ
+    const templateJson = {
+      "title": "Концепция и стиль оформления документа",
+      "summary": "Этот документ представляет собой автономный HTML-шаблон для создания интерактивных одностраничных руководств без внешних зависимостей.",
+      "sections": {
+        "concept": {
+          "title": "Общая концепция",
+          "points": {
+            "format": "Единый HTML-файл (Single-file).",
+            "technology": "Чистый HTML и CSS. Весь код является самодостаточным.",
+            "behavior": "Одностраничное приложение (SPA), где контент отображается во вкладках. Логика переключения реализована на чистом JavaScript."
+          }
+        },
+        "htmlStructure": {
+          "title": "Структура HTML",
+          "points": {
+            "mainContainer": "<div class=\"container\"> для центрирования и отступов.",
+            "mainBlock": "<div class=\"card\"> для визуального объединения всего контента.",
+            "navigation": "Меню вкладок <ul class=\"tabs\"> с кнопками <button class=\"tab-button\">.",
+            "content": "Каждый раздел находится в своей панели <div class=\"tab-pane\">."
+          }
+        },
+        "cssStyling": {
+          "title": "Стилизация (CSS)",
+          "points": {
+            "internalStyles": "Полный набор CSS-правил находится внутри тега <style> в <head>. Стили имитируют внешний вид компонентов Bootstrap (карточки, кнопки, вкладки), но не используют сам фреймворк."
+          }
+        },
+        "javascriptFunctionality": {
+          "title": "Функциональность (JavaScript)",
+          "points": {
+            "location": "Весь JS-код находится внутри тега <script> в конце документа.",
+            "tabSwitching": "Реализовано с помощью слушателя событий `DOMContentLoaded`, который находит все кнопки вкладок и панели, а затем по клику управляет их классами `.active` и `.show`.",
+            "copying": "Функция `copyContent()` использует надежный метод `document.execCommand('copy')` для обеспечения работы в защищенных средах.",
+            "exporting": "Функция `exportJson()` генерирует и скачивает файл `.json`.",
+            "initialization": "При загрузке страницы JSON-объекты автоматически форматируются и вставляются в соответствующие блоки."
+          }
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Логика для вкладок
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                // Деактивируем все
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('active', 'show');
+                });
+
+                // Активируем нужные
+                const clickedButton = event.currentTarget;
+                clickedButton.classList.add('active');
+                const targetPaneId = clickedButton.getAttribute('data-target');
+                const targetPane = document.querySelector(targetPaneId);
+                if (targetPane) {
+                    targetPane.classList.add('active', 'show');
+                }
+            });
+        });
+
+        // Автозаполнение JSON
         document.getElementById('jsonPrompt').textContent = JSON.stringify(promptJson, null, 2);
+        // АВТОЗАПОЛНЕНИЕ НОВОЙ ВКЛАДКИ
+        document.getElementById('templateJsonPrompt').textContent = JSON.stringify(templateJson, null, 2);
     });
 
-    // Function to copy content from an element by ID
-    function copyContent(elementId) {
-        const content = document.getElementById(elementId).innerText;
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = content;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextArea);
-
-        // Visual feedback
-        const button = event.target.closest('button');
-        const originalText = button.innerHTML;
-        button.innerHTML = 'Скопировано!';
-        button.disabled = true;
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }, 2000);
-    }
-
-    // Function to export JSON content as a file
-    function exportJson() {
-        const jsonString = JSON.stringify(promptJson, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'ai_prompt.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
 </script>
 
 </body>
 </html>
-
 
