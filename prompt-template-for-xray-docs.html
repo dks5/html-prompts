@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер-промпт для генерации HTML-руководства по скрипту Xray</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .nav-tabs .nav-link {
+            color: #495057;
+        }
+        .nav-tabs .nav-link.active {
+            color: #000;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+        pre {
+            background-color: #e9ecef;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+        }
+        .card-header-pills {
+            position: relative;
+        }
+        .action-buttons {
+            position: absolute;
+            top: 0.8rem;
+            right: 1rem;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4 mb-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="promptTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-pane" type="button" role="tab" aria-controls="text-pane" aria-selected="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-text me-1" viewBox="0 0 16 16"><path d="M5 4.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM5 10.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg>
+                        Текстовый формат
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-pane" type="button" role="tab" aria-controls="json-pane" aria-selected="false">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-code me-1" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/><path d="M8.646 6.646a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L10.293 9 8.646 7.354a.5.5 0 0 1 0-.708zm-1.292 0a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708-.708L5.707 9l1.647-1.646a.5.5 0 0 0 0-.708z"/></svg>
+                        Формат JSON
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="promptTabsContent">
+                <!-- Text Pane -->
+                <div class="tab-pane fade show active" id="text-pane" role="tabpanel" aria-labelledby="text-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Мастер-промпт (Текст)</h5>
+                        <button class="btn btn-primary btn-sm" onclick="copyContent('textPrompt')">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                            Копировать
+                        </button>
+                    </div>
+                    <pre><code id="textPrompt">**Роль:** Ты — опытный full-stack разработчик, специализирующийся на front-end (HTML, CSS, Bootstrap) и back-end скриптах (bash). Твоя задача — создать техническую документацию в формате интерактивной HTML-страницы.
+
+**Основная цель:** Создать единый (single-file) HTML-документ для руководства по установке и управлению прокси-сервером Xray с помощью предоставленного bash-скрипта. Документ должен быть современным, адаптивным и максимально функциональным для пользователя.
+
+---
+
+### **Ключевые требования к HTML-документу:**
+
+1.  **Формат:** Единый HTML-файл. Весь CSS и JavaScript должны быть либо встроены, либо подключены через CDN (предпочтительно для Bootstrap).
+2.  **Фреймворк:** Используй **Bootstrap 5** для стилизации и адаптивности. Все компоненты (навигация, карточки, кнопки) должны быть стандартными компонентами Bootstrap.
+3.  **Адаптивность:** Страница должна корректно отображаться на десктопах и мобильных устройствах. На узких экранах навигационная панель должна сворачиваться в "бургер-меню".
+4.  **Структура и навигация (Single Page Application):** Документ должен функционировать как одностраничное приложение (SPA). При клике на ссылку в навигационной панели (`navbar`) должен отображаться *только* соответствующий раздел контента. Все остальные разделы должны быть скрыты. Для реализации этого поведения используй компонент Bootstrap 5 "Navs & Tabs" (Навигация и вкладки). Навигационная панель будет служить переключателем, а каждый основной раздел контента — отдельной "вкладкой" (`tab-pane`).
+
+---
+
+### **Содержание и структура HTML-страницы (`<body>`):**
+
+**Весь контент, описанный ниже в разделах, должен быть организован как содержимое для вкладок (компонент `tab-content` из Bootstrap). Каждый пронумерованный "Раздел" будет представлять собой отдельный `<div>` с классом `tab-pane`.**
+
+**Раздел 1: Панель конфигурации (Плейсхолдеры)**
+* **Задача:** Создай в самом верху страницы заметный блок (например, Bootstrap `alert` или `card`).
+* **Название:** "Панель быстрой конфигурации".
+* **Содержимое:** Внутри этого блока должны быть представлены ключевые переменные из скрипта, которые пользователь может захотеть изменить. Для каждой переменной предоставь готовый к копированию фрагмент кода для вставки в основной скрипт.
+* **Пример реализации:**
+    * **Порт сервера:** `PORT=443`
+    * **Целевой домен для REALITY:** `DEST_DOMAIN="github.com:443"`
+    * **Имена серверов для REALITY:** `SERVER_NAMES="github.com", "www.github.com"`
+
+**Раздел 2: Установка (Исходный скрипт)**
+* **Задача:** Размести полный и **немодифицированный** исходный bash-скрипт.
+* **Оформление:** Используй блок `<pre><code>...</code></pre>` для корректного отображения кода с подсветкой синтаксиса (если возможно) и кнопкой "Копировать".
+* **Описание:** Под блоком с кодом дай краткое описание того, что делает скрипт на каждом этапе (обновление пакетов, установка Xray, генерация ключей, создание конфига и т.д.).
+
+**Раздел 3: Управление сервером**
+* **Задача:** Опиши команды управления, которые создает скрипт.
+* **Содержимое:** Создай список или таблицу с командами (`mainuser`, `newuser`, `rmuser`, `sharelink`, `userlist`) и кратким, понятным описанием того, что делает каждая команда.
+
+**Раздел 4: Модернизация скрипта (Сценарии маршрутизации)**
+* **Это самый важный раздел. Выполни его максимально точно.**
+* **Задача:** Предоставь готовые к использованию фрагменты JSON-кода для блока `"routing"` в файле `/usr/local/etc/xray/config.json` для трёх разных сценариев. **Не давай объяснений вместо кода, предоставь именно готовый код.**
+
+* **Сценарий 1: По умолчанию (Блокировка рекламы и IP из РФ)**
+    * **Описание:** Стандартная конфигурация из исходного скрипта. Трафик на рекламные домены и российские IP-адреса блокируется.
+    * **Код:** Предоставь полный и готовый к копированию блок `"routing"` из оригинального скрипта.
+
+* **Сценарий 2: Прямое соединение для сайтов из РФ**
+    * **Описание:** Трафик на рекламные домены блокируется, трафик на российские IP-адреса идёт напрямую (минуя прокси), остальной трафик идёт через прокси.
+    * **Код:** Предоставь полный и готовый к копированию блок `"routing"`, который реализует эту логику. Он должен содержать правило для `"geoip:ru"` с `"outboundTag": "direct"`.
+
+* **Сценарий 3: Прокси только для Google и YouTube**
+    * **Описание:** Блокируется реклама. Трафик на домены Google и YouTube (включая все поддомены) идёт через прокси. **Весь остальной трафик** (кроме рекламы) направляется напрямую.
+    * **Код:** Предоставь полный и готовый к копированию блок `"routing"`, который использует `"geosite:google"`, `"geosite:youtube"`, `"geosite:category-ads-all"` и правило по умолчанию для прямого соединения.
+
+---
+
+### **Итоговая проверка:**
+
+* Убедись, что весь запрошенный контент присутствует.
+* Проверь, что HTML-структура логична и использует семантические теги.
+* Убедись, что предоставленные JSON-фрагменты для сценариев модернизации синтаксически корректны и полностью готовы к вставке в файл конфигурации Xray.</code></pre>
+                </div>
+                <!-- JSON Pane -->
+                <div class="tab-pane fade" id="json-pane" role="tabpanel" aria-labelledby="json-tab">
+                     <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Мастер-промпт (JSON)</h5>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-2" onclick="copyContent('jsonPrompt')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                                Копировать
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="exportJson()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                                Экспорт
+                            </button>
+                        </div>
+                    </div>
+                    <pre><code id="jsonPrompt"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    // JSON data for the prompt
+    const promptJson = {
+      "role": "Ты — опытный full-stack разработчик, специализирующийся на front-end (HTML, CSS, Bootstrap) и back-end скриптах (bash). Твоя задача — создать техническую документацию в формате интерактивной HTML-страницы.",
+      "mainGoal": "Создать единый (single-file) HTML-документ для руководства по установке и управлению прокси-сервером Xray с помощью предоставленного bash-скрипта. Документ должен быть современным, адаптивным и максимально функциональным для пользователя.",
+      "keyRequirements": [
+        {
+          "title": "Формат",
+          "description": "Единый HTML-файл. Весь CSS и JavaScript должны быть либо встроены, либо подключены через CDN (предпочтительно для Bootstrap)."
+        },
+        {
+          "title": "Фреймворк",
+          "description": "Используй Bootstrap 5 для стилизации и адаптивности. Все компоненты (навигация, карточки, кнопки) должны быть стандартными компонентами Bootstrap."
+        },
+        {
+          "title": "Адаптивность",
+          "description": "Страница должна корректно отображаться на десктопах и мобильных устройствах. На узких экранах навигационная панель должна сворачиваться в 'бургер-меню'."
+        },
+        {
+          "title": "Структура и навигация (Single Page Application)",
+          "description": "Документ должен функционировать как одностраничное приложение (SPA). При клике на ссылку в навигационной панели (`navbar`) должен отображаться *только* соответствующий раздел контента. Все остальные разделы должны быть скрыты. Для реализации этого поведения используй компонент Bootstrap 5 'Navs & Tabs' (Навигация и вкладки). Навигационная панель будет служить переключателем, а каждый основной раздел контента — отдельной 'вкладкой' (`tab-pane`)."
+        }
+      ],
+      "contentStructure": {
+        "introduction": "Весь контент, описанный ниже в разделах, должен быть организован как содержимое для вкладок (компонент `tab-content` из Bootstrap). Каждый пронумерованный 'Раздел' будет представлять собой отдельный `<div>` с классом `tab-pane`.",
+        "sections": [
+          {
+            "title": "Раздел 1: Панель конфигурации (Плейсхолдеры)",
+            "content": [
+              "Задача: Создай в самом верху страницы заметный блок (например, Bootstrap `alert` или `card`).",
+              "Название: 'Панель быстрой конфигурации'.",
+              "Содержимое: Внутри этого блока должны быть представлены ключевые переменные из скрипта, которые пользователь может захотеть изменить. Для каждой переменной предоставь готовый к копированию фрагмент кода для вставки в основной скрипт.",
+              "Пример реализации: Порт сервера: `PORT=443`, Целевой домен для REALITY: `DEST_DOMAIN='github.com:443'`, Имена серверов для REALITY: `SERVER_NAMES='github.com', 'www.github.com'`"
+            ]
+          },
+          {
+            "title": "Раздел 2: Установка (Исходный скрипт)",
+            "content": [
+              "Задача: Размести полный и немодифицированный исходный bash-скрипт.",
+              "Оформление: Используй блок `<pre><code>...</code></pre>` для корректного отображения кода с подсветкой синтаксиса (если возможно) и кнопкой 'Копировать'.",
+              "Описание: Под блоком с кодом дай краткое описание того, что делает скрипт на каждом этапе (обновление пакетов, установка Xray, генерация ключей, создание конфига и т.д.)."
+            ]
+          },
+          {
+            "title": "Раздел 3: Управление сервером",
+            "content": [
+              "Задача: Опиши команды управления, которые создает скрипт.",
+              "Содержимое: Создай список или таблицу с командами (`mainuser`, `newuser`, `rmuser`, `sharelink`, `userlist`) и кратким, понятным описанием того, что делает каждая команда."
+            ]
+          },
+          {
+            "title": "Раздел 4: Модернизация скрипта (Сценарии маршрутизации)",
+            "importantNote": "Это самый важный раздел. Выполни его максимально точно.",
+            "task": "Предоставь готовые к использованию фрагменты JSON-кода для блока `routing` в файле `/usr/local/etc/xray/config.json` для трёх разных сценариев. Не давай объяснений вместо кода, предоставь именно готовый код.",
+            "scenarios": [
+              {
+                "name": "Сценарий 1: По умолчанию (Блокировка рекламы и IP из РФ)",
+                "description": "Стандартная конфигурация из исходного скрипта. Трафик на рекламные домены и российские IP-адреса блокируется.",
+                "code": "Предоставь полный и готовый к копированию блок `routing` из оригинального скрипта."
+              },
+              {
+                "name": "Сценарий 2: Прямое соединение для сайтов из РФ",
+                "description": "Трафик на рекламные домены блокируется, трафик на российские IP-адреса идёт напрямую (минуя прокси), остальной трафик идёт через прокси.",
+                "code": "Предоставь полный и готовый к копированию блок `routing`, который реализует эту логику. Он должен содержать правило для `geoip:ru` с `outboundTag`: `direct`."
+              },
+              {
+                "name": "Сценарий 3: Прокси только для Google и YouTube",
+                "description": "Блокируется реклама. Трафик на домены Google и YouTube (включая все поддомены) идёт через прокси. Весь остальной трафик (кроме рекламы) направляется напрямую.",
+                "code": "Предоставь полный и готовый к копированию блок `routing`, который использует `geosite:google`, `geosite:youtube`, `geosite:category-ads-all` и правило по умолчанию для прямого соединения."
+              }
+            ]
+          }
+        ]
+      },
+      "finalCheck": [
+        "Убедись, что весь запрошенный контент присутствует.",
+        "Проверь, что HTML-структура логична и использует семантические теги.",
+        "Убедись, что предоставленные JSON-фрагменты для сценариев модернизации синтаксически корректны и полностью готовы к вставке в файл конфигурации Xray."
+      ]
+    };
+
+    // Populate the JSON code block on page load
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById('jsonPrompt').textContent = JSON.stringify(promptJson, null, 2);
+    });
+
+    // Function to copy content from an element by ID
+    function copyContent(elementId) {
+        const content = document.getElementById(elementId).innerText;
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = content;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+
+        // Visual feedback
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = 'Скопировано!';
+        button.disabled = true;
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }, 2000);
+    }
+
+    // Function to export JSON content as a file
+    function exportJson() {
+        const jsonString = JSON.stringify(promptJson, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ai_prompt.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>
+
+
