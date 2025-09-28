@@ -30,6 +30,9 @@
             background-color: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
             display: flex;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
         }
         .card-body {
             padding: 1.25rem;
@@ -39,8 +42,9 @@
         .tabs {
             list-style: none;
             padding-left: 0;
-            margin-bottom: -1px; /* Скрыть нижнюю границу карточки */
+            margin-bottom: -1px;
             display: flex;
+            flex-wrap: wrap; 
         }
         .tab-button {
             padding: 0.5rem 1rem;
@@ -49,18 +53,33 @@
             cursor: pointer;
             background-color: transparent;
             font-size: 1rem;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .tab-button.active {
-            color: #000;
-            background-color: #fff;
-            border-color: #dee2e6 #dee2e6 #fff;
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
             border-radius: 0.25rem 0.25rem 0 0;
+        }
+        .tab-button.active .tab-icon {
+            fill: #fff;
         }
         .tab-pane {
             display: none;
         }
         .tab-pane.active.show {
             display: block;
+        }
+        
+        /* Стили для иконок вкладок */
+        .tab-icon {
+            width: 1.2em;
+            height: 1.2em;
+            display: inline-block;
+            fill: #495057;
         }
         
         /* Стили для контента внутри вкладок */
@@ -113,6 +132,13 @@
         .me-2 {
             margin-right: 0.5rem;
         }
+
+        /* ИЗМЕНЕНИЕ: Media Query для мобильных устройств */
+        @media (max-width: 600px) {
+            .tab-text-detail {
+                display: none; /* Скрываем поясняющий текст */
+            }
+        }
     </style>
 </head>
 <body>
@@ -121,10 +147,42 @@
     <div class="card">
         <div class="card-header">
             <ul class="tabs" id="promptTabs">
-                <li><button class="tab-button active" data-target="#text-pane">Промпт (Текст)</button></li>
-                <li><button class="tab-button" data-target="#json-pane">Промпт (JSON)</button></li>
-                <li><button class="tab-button" data-target="#template-pane">Шаблон оформления</button></li>
-                <li><button class="tab-button" data-target="#template-json-pane">Шаблон (JSON)</button></li>
+                <li>
+                    <button class="tab-button active" data-target="#text-pane">
+                        <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5 4.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                          <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                        </svg>
+                        <span class="tab-text">Промпт<span class="tab-text-detail"> (Текст)</span></span>
+                    </button>
+                </li>
+                <li>
+                    <button class="tab-button" data-target="#json-pane">
+                        <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                          <path d="M8.646 6.646a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L10.293 9 8.646 7.354a.5.5 0 0 1 0-.708zm-1.292 0a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708-.708L5.707 9l1.647-1.646a.5.5 0 0 0 0-.708z"/>
+                        </svg>
+                        <span class="tab-text">Промпт<span class="tab-text-detail"> (JSON)</span></span>
+                    </button>
+                </li>
+                <li>
+                    <button class="tab-button" data-target="#template-pane">
+                        <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5 4.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                          <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                        </svg>
+                        <span class="tab-text">Шаблон<span class="tab-text-detail"> (Текст)</span></span>
+                    </button>
+                </li>
+                <li>
+                    <button class="tab-button" data-target="#template-json-pane">
+                        <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                          <path d="M8.646 6.646a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L10.293 9 8.646 7.354a.5.5 0 0 1 0-.708zm-1.292 0a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0 0 .708l2 2a.5.5 0 0 0 .708-.708L5.707 9l1.647-1.646a.5.5 0 0 0 0-.708z"/>
+                        </svg>
+                        <span class="tab-text">Шаблон<span class="tab-text-detail"> (JSON)</span></span>
+                    </button>
+                </li>
             </ul>
         </div>
         <div class="card-body">
@@ -210,10 +268,10 @@
                 <!-- Template Pane -->
                 <div class="tab-pane" id="template-pane">
                      <div class="pane-header">
-                        <h5 class="pane-title">Шаблон оформления</h5>
+                        <h5 class="pane-title">Шаблон (Текст)</h5>
                         <button class="btn btn-primary" onclick="copyContent(this, 'templatePrompt')">Копировать</button>
                     </div>
-                    <pre><code id="templatePrompt">### **Концепция и стиль оформления документа**
+                    <pre><code id="templatePrompt">### **Концепция и стиль оформления документа (Версия 10)**
 
 Этот документ представляет собой автономный HTML-шаблон для создания интерактивных одностраничных руководств без внешних зависимостей.
 
@@ -229,16 +287,19 @@
 - **Контент:** Каждый раздел находится в своей панели `&lt;div class="tab-pane"&gt;`.
 
 **3. Стилизация (CSS):**
-- **Внутренние стили:** Полный набор CSS-правил находится внутри тега `&lt;style&gt;` в `&lt;head&gt;`. Стили имитируют внешний вид компонентов Bootstrap (карточки, кнопки, вкладки), но не используют сам фреймворк.
+- **Внутренние стили:** Полный набор CSS-правил находится внутри тега `&lt;style&gt;`.
+- **"Липкое" меню:** Заголовок с вкладками (`.card-header`) зафиксирован вверху экрана при прокрутке с помощью `position: sticky`.
+- **Активная вкладка:** Активная вкладка выделяется синим цветом (`#0d6efd`) для лучшей наглядности.
+- **Адаптивность:** Панель вкладок (`.tabs`) автоматически переносит кнопки на новую строку на узких экранах благодаря свойству `flex-wrap: wrap`.
 
 **4. Функциональность (JavaScript):**
 - **Расположение:** Весь JS-код находится внутри тега `&lt;script&gt;` в конце документа.
-- **Переключение вкладок:** Реализовано с помощью слушателя событий `DOMContentLoaded`, который находит все кнопки вкладок и панели, а затем по клику управляет их классами `.active` и `.show`.
-- **Копирование:** Функция `copyContent()` использует надежный метод `document.execCommand('copy')` для обеспечения работы в защищенных средах.
+- **Переключение вкладок:** Реализовано с помощью слушателя событий `DOMContentLoaded`.
+- **Копирование:** Функция `copyContent()` использует надежный метод `document.execCommand('copy')`.
 - **Экспорт:** Функция `exportJson()` генерирует и скачивает файл `.json`.
 - **Инициализация:** При загрузке страницы JSON-объекты автоматически форматируются и вставляются в соответствующие блоки.</code></pre>
                 </div>
-                <!-- Template JSON Pane (НОВАЯ ВКЛАДКА) -->
+                <!-- Template JSON Pane -->
                 <div class="tab-pane" id="template-json-pane">
                      <div class="pane-header">
                         <h5 class="pane-title">Шаблон (JSON)</h5>
@@ -375,9 +436,9 @@
       ]
     };
 
-    // НОВЫЙ ОБЪЕКТ ДЛЯ ЧЕТВЕРТОЙ ВКЛАДКИ
+    // ОБЪЕКТ ДЛЯ ЧЕТВЕРТОЙ ВКЛАДКИ
     const templateJson = {
-      "title": "Концепция и стиль оформления документа",
+      "title": "Концепция и стиль оформления документа (Версия 10)",
       "summary": "Этот документ представляет собой автономный HTML-шаблон для создания интерактивных одностраничных руководств без внешних зависимостей.",
       "sections": {
         "concept": {
@@ -400,15 +461,18 @@
         "cssStyling": {
           "title": "Стилизация (CSS)",
           "points": {
-            "internalStyles": "Полный набор CSS-правил находится внутри тега <style> в <head>. Стили имитируют внешний вид компонентов Bootstrap (карточки, кнопки, вкладки), но не используют сам фреймворк."
+            "internalStyles": "Полный набор CSS-правил находится внутри тега <style>.",
+            "stickyMenu": "Заголовок с вкладками (.card-header) зафиксирован вверху экрана при прокрутке с помощью `position: sticky`.",
+            "activeTab": "Активная вкладка выделяется синим цветом (#0d6efd) для лучшей наглядности.",
+            "responsiveTabs": "Панель вкладок (.tabs) автоматически переносит кнопки на новую строку на узких экранах благодаря свойству `flex-wrap: wrap`."
           }
         },
         "javascriptFunctionality": {
           "title": "Функциональность (JavaScript)",
           "points": {
             "location": "Весь JS-код находится внутри тега <script> в конце документа.",
-            "tabSwitching": "Реализовано с помощью слушателя событий `DOMContentLoaded`, который находит все кнопки вкладок и панели, а затем по клику управляет их классами `.active` и `.show`.",
-            "copying": "Функция `copyContent()` использует надежный метод `document.execCommand('copy')` для обеспечения работы в защищенных средах.",
+            "tabSwitching": "Реализовано с помощью слушателя событий `DOMContentLoaded`.",
+            "copying": "Функция `copyContent()` использует надежный метод `document.execCommand('copy')`.",
             "exporting": "Функция `exportJson()` генерирует и скачивает файл `.json`.",
             "initialization": "При загрузке страницы JSON-объекты автоматически форматируются и вставляются в соответствующие блоки."
           }
@@ -442,7 +506,6 @@
 
         // Автозаполнение JSON
         document.getElementById('jsonPrompt').textContent = JSON.stringify(promptJson, null, 2);
-        // АВТОЗАПОЛНЕНИЕ НОВОЙ ВКЛАДКИ
         document.getElementById('templateJsonPrompt').textContent = JSON.stringify(templateJson, null, 2);
     });
 
