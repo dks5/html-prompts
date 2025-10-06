@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Промпт для YouTube таймкодов</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f7;
+            color: #495057;
+        }
+        .prompt-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #e9eef2;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            position: relative;
+        }
+        .prompt-title {
+            color: #5c7c9c;
+            font-weight: 700;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .copy-btn svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .section-title {
+            color: #5c7c9c;
+            border-bottom: 2px solid #5c7c9c;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .list-group-item {
+            background-color: #f0f4f7;
+            border-radius: 0.5rem !important;
+            margin-bottom: 0.75rem;
+        }
+        .format-example {
+            background-color: #dee4ea;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .copy-notice {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #5c8b7d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: none;
+            z-index: 1000;
+        }
+        pre {
+            background-color: #2b3e50;
+            color: #e6e8eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #5c7c9c;
+            background-color: transparent;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #5c7c9c !important;
+            color: #ffffff !important;
+            border-bottom: 2px solid #5c7c9c !important;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+        }
+        #copyButtonHTML {
+            background-color: #5c7c9c;
+            border-color: #5c7c9c;
+            color: #fff;
+        }
+        #copyButtonJSON, #exportButtonJSON {
+            background-color: #5c7c9c;
+            border-color: #5c7c9c;
+        }
+        #exportButtonJSON {
+            background-color: #5c8b7d;
+            border-color: #5c8b7d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="prompt-container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="html-tab" data-bs-toggle="tab" data-bs-target="#html-content" type="button" role="tab" aria-controls="html-content" aria-selected="true">HTML-версия</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-content" type="button" role="tab" aria-controls="json-content" aria-selected="false">JSON-версия</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="css-tab" data-bs-toggle="tab" data-bs-target="#css-content" type="button" role="tab" aria-controls="css-content" aria-selected="false">CSS (JSON-версия)</button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3 active" id="html-content">
+        <button id="copyButtonHTML" class="btn btn-primary copy-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+            </svg>
+        </button>
+        <div class="text-center mb-4" id="htmlPromptContent">
+            <h1 class="prompt-title">Промпт для создания содержания лекции с таймкодами</h1>
+            <p class="role text-muted fst-italic mt-2">
+                Роль: Ты — опытный ассистент, специализирующийся на анализе и структурировании видео-контента. Твоя сильная сторона — умение превращать длинные транскрипции лекций и докладов в понятное и удобное иерархическое содержание с кликабельными таймкодами для YouTube.
+            </p>
+        </div>
+        <div class="content">
+            <h2 class="section-title">Задача</h2>
+            <p class="list-group-item">
+                На вход ты получаешь полную и непрерывную стенограмму лекции с временными метками. Твоя задача — глубоко проанализировать текст и создать на его основе **два варианта иерархического содержания**. Первый вариант должен отражать только ключевые тематические блоки, а второй — быть максимально подробным, отмечая каждую новую мысль.
+            </p>
+            <h2 class="section-title">Правила выполнения</h2>
+            <ul class="list-unstyled">
+                <li class="list-group-item"><strong>Анализ структуры:</strong> Внимательно изучи весь текст, чтобы определить основные логические разделы лекции (например, введение, разбор каждой отдельной темы, заключение).</li>
+                <li class="list-group-item"><strong>Идентификация подтем:</strong> Внутри каждого основного раздела найди более мелкие смысловые блоки (например, история вопроса, механизм действия, клинические исследования, дозировки, сравнение с аналогами).</li>
+                <li class="list-group-item"><strong>Формулировка заголовков:</strong> Для каждого найденного блока (основного и подтемы) сформулируй описательный заголовок, который точно и ёмко передаёт суть обсуждаемого фрагмента.</li>
+                <li class="list-group-item"><strong>Фиксация времени:</strong> Укажи точную временную метку, соответствующую началу каждого смыслового блока.</li>
+                <li class="list-group-item"><strong>Создание двух вариантов содержания:</strong>
+                    <ul class="list-unstyled ps-4 mt-2">
+                        <li><strong>Вариант 1 (Ключевые темы):</strong> Создай иерархический список. Основные разделы должны быть на верхнем уровне. Вложенные подтемы должны быть оформлены с отступом (например, с помощью дефиса или табуляции), отражая логическую структуру лекции.</li>
+                        <li><strong>Вариант 2 (Подробное содержание):</strong> Создай второй, более детальный иерархический список. В нём, помимо основных разделов и подтем, отметь таймкодами и заголовками каждую новую мысль, поворот в рассуждении или конкретный пример.</li>
+                    </ul>
+                </li>
+                <li class="list-group-item"><strong>Хронология:</strong> Оба списка должны строго следовать хронологическому порядку лекции.</li>
+                <li class="list-group-item"><strong>Формат метки:</strong> Временные метки должны быть в формате `ЧЧ:ММ:СС`.</li>
+            </ul>
+            <h2 class="section-title">Формат результата</h2>
+            <div class="format-example">
+                <p class="fw-bold">Вариант 1: Содержание по ключевым темам</p>
+                <p>[ЧЧ:ММ:СС] **[Название основного раздела 1]**</p>
+                <p>&nbsp;&nbsp;[ЧЧ:ММ:СС] - [Название подтемы 1.1]</p>
+                <p>&nbsp;&nbsp;[ЧЧ:ММ:СС] - [Название подтемы 1.2]</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;[ЧЧ:ММ:СС] -- [Название вложенной подтемы 1.2.1]</p>
+                <p>[ЧЧ:ММ:СС] **[Название основного раздела 2]**</p>
+                <p>&nbsp;&nbsp;[ЧЧ:ММ:СС] - [Название подтемы 2.1]</p>
+            </div>
+            <div class="format-example mt-4">
+                <p class="fw-bold">Вариант 2: Подробное содержание</p>
+                <p>[ЧЧ:ММ:СС] **[Название основного раздела 1]**</p>
+                <p>&nbsp;&nbsp;[ЧЧ:ММ:СС] - [Название подтемы 1.1]</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;[ЧЧ:ММ:СС] -- [Детальное описание первой мысли]</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;[ЧЧ:ММ:СС] -- [Детальное описание второй мысли]</p>
+            </div>
+            <h2 class="section-title">Пример результата</h2>
+            <div class="format-example">
+                <p class="fw-bold">Вариант 1: Содержание по ключевым темам</p>
+                <p>00:00:16 <strong>Пептид LL-37</strong></p>
+                <p>&nbsp;&nbsp;00:00:47 - История и исследования</p>
+                <p>&nbsp;&nbsp;00:03:36 - Механизм действия (Антибактериальный, противовирусный, иммуномодуляция)</p>
+                <p>&nbsp;&nbsp;00:10:39 - Доказательная база и клиническое применение</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:10:39 -- Заживление ран и кожные инфекции</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:15:10 -- Воспалительные заболевания кишечника</p>
+                <p>&nbsp;&nbsp;00:27:17 - Взаимодействие с карциномой молочной железы</p>
+                <p>&nbsp;&nbsp;00:40:10 - Синергизм с другими пептидами и БАДами</p>
+                <p>00:50:48 <strong>Пептид Гипон</strong></p>
+                <p>&nbsp;&nbsp;00:51:42 - История разработки и ключевые применения</p>
+                <p>&nbsp;&nbsp;00:52:35 - Механизм действия</p>
+            </div>
+            <div class="format-example mt-4">
+                <p class="fw-bold">Вариант 2: Подробное содержание</p>
+                 <p>00:00:16 <strong>Пептид LL-37</strong></p>
+                <p>&nbsp;&nbsp;00:00:16 - Введение в пептид LL-37, его структура и особенности</p>
+                <p>&nbsp;&nbsp;00:00:47 - <strong>История и исследования</strong></p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:00:47 -- Первые исследования кателицидинов</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:01:09 -- Выделение гена-предшественника из костного мозга</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:01:37 -- Обнаружение связи с аутоиммунными заболеваниями (псориаз)</p>
+                <p>&nbsp;&nbsp;00:03:36 - <strong>Механизм действия</strong></p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:03:36 -- Антибактериальный эффект: разрушение мембран бактерий</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;00:04:32 -- Противогрибковое действие (Candida albicans)</p>
+            </div>
+            <div class="mt-4 text-center">
+                <p class="role text-muted fst-italic">Тон: профессиональный, точный и структурированный, с фокусом на создание удобной навигации для зрителя.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="json-content">
+        <div class="d-flex justify-content-end mb-3">
+            <button id="copyButtonJSON" class="btn btn-primary btn-sm me-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                </svg>
+            </button>
+            <button id="exportButtonJSON" class="btn btn-success btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-down" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1h-2z"/>
+                    <path fill-rule="evenodd" d="M7.646 15.146a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 13.793V6.5a.5.5 0 0 1 1 0v7.293l2.146-2.147a.5.5 0 0 1 .708.708l-3 3z"/>
+                </svg>
+            </button>
+        </div>
+        <pre id="jsonPromptContent">
+{
+  "title": "Промпт для создания YouTube таймкодов",
+  "role": "Ты — эксперт по работе с текстами и структурированием видео-контента с 10-летним опытом, который помогает авторам YouTube правильно оформлять временные метки для описания роликов. Ты умеешь выделять ключевые смысловые блоки и автоматически превращать их в кликабельные таймкоды, распознаваемые YouTube.",
+  "task": "На вход ты получаешь транскрибированный текст с временными метками. Это полная и непрерывная стенограмма всего эфира. Твоя задача — проанализировать текст и создать два списка таймкодов.",
+  "rules": [
+    {
+      "name": "Поиск вопросов",
+      "description": "Найти все вопросы, используя два принципа:",
+      "details": {
+        "явные_вопросы": "Найти все упоминания начала нового вопроса, используя триггерные фразы, такие как «вопрос», «следующий вопрос», «был задан вопрос», «звучал вопрос» и их синонимичные варианты.",
+        "неявные_вопросы": "В тексте могут быть смысловые блоки, которые по сути являются ответами на новые вопросы, но перед ними автор не произносит триггерную фразу (например, просто завершает предыдущую мысль и начинает новую). Для таких блоков также необходимо создавать таймкод."
+      }
+    },
+    "Зафиксировать временную метку, которая стоит рядом с началом найденного вопроса.",
+    "Сформировать заголовок вопроса. Заголовок должен включать в себя как вводные слова, идущие сразу после триггера (например, «вопрос больше технический о...»), так и саму суть вопроса. Не игнорировать вводные конструкции.",
+    "Составить список таймкодов в формате, который понимает YouTube (часы:минуты:секунды + краткий заголовок).",
+    "Каждый вопрос в основном списке должен начинаться строго со слова «Вопрос» и порядкового номера (например: «Вопрос 1.», «Вопрос 2.» и т. д.).",
+    "Если оригинальная формулировка вопроса длинная, сокращай её до ёмкой и понятной фразы (не более 8–10 слов), сохраняя при этом вводную часть согласно правилу №3.",
+    "Обработать ВЕСЬ текст до конца, даже если он длинный.",
+    "Если список не помещается в одно сообщение — раздели результат на части и продолжи до полного завершения.",
+    "После того как будет сформирован основной список таймкодов, дополнительно сгенерировать блок «Оригинальные формулировки вопросов».",
+    "Для каждого вопроса в этом блоке укажи ту же временную метку.",
+    "Вставь расширенный фрагмент текста: 20 слов ДО и 20 слов ПОСЛЕ ключевого слова или начала смыслового блока.",
+    "Если до или после ключевой фразы в тексте менее 20 слов, включить в фрагмент все доступные слова в этом диапазоне.",
+    "Проанализировать весь текст до конца. Обработать каждую временную метку и каждое упоминание начала нового вопроса (явного или неявного). Подтверди, что ты выполнил эту задачу на 100% и не пропустил ни одной части."
+  ],
+  "format": {
+    "основной_список": "[временная метка] Вопрос [номер]. [краткий заголовок вопроса]",
+    "дополнительный_блок": {
+      "заголовок": "Оригинальные формулировки вопросов",
+      "содержание": "[временная метка] [расширенный текстовый фрагмент (20 слов до и 20 слов после)]",
+      "пример_метки": "[00:05:03]"
+    }
+  },
+  "example_result": {
+    "основной_список": [
+      "00:00:00 Введение",
+      "01:25:16 Вопрос 1. Технический вопрос о холестерине",
+      "01:40:05 Вопрос 2. Вопрос про генетические особенности обмена веществ"
+    ],
+    "оригинальные_формулировки": [
+      "01:25:16 …и в один прекрасный момент мне пришла хорошая идея посмотреть у неё генетический фон. Следующий вопрос был больше технический: как вы диагностируете холестерин? Мы обсудим это…",
+      "01:40:05 …поэтому подходим индивидуально, смотрим, ищем. Следующий вопрос: какие генетические особенности влияют на обмен веществ? Здесь важно отметить, что генетика играет ключевую роль…"
+    ]
+  },
+  "tone": "профессиональный и структурированный, с акцентом на удобство зрителя."
+}
+        </pre>
+    </div>
+
+    <div class="tab-content" id="css-content">
+        <p class="text-muted fst-italic mt-2">
+            Здесь вы можете найти все CSS-стили этой страницы, представленные в формате JSON. Вы можете легко скопировать или экспортировать этот код, чтобы использовать его в своих проектах.
+        </p>
+        <div class="d-flex justify-content-end mb-3">
+            <button id="copyButtonCSS" class="btn btn-primary btn-sm me-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                </svg>
+            </button>
+            <button id="exportButtonCSS" class="btn btn-success btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-down" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1h-2z"/>
+                    <path fill-rule="evenodd" d="M7.646 15.146a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 13.793V6.5a.5.5 0 0 1 1 0v7.293l2.146-2.147a.5.5 0 0 1 .708.708l-3 3z"/>
+                </svg>
+            </button>
+        </div>
+        <pre id="cssPromptContent">
+{
+  "body": {
+    "font-family": "'Inter', sans-serif",
+    "background-color": "#f0f4f7",
+    "color": "#495057"
+  },
+  ".prompt-container": {
+    "max-width": "900px",
+    "margin": "20px auto",
+    "background-color": "#e9eef2",
+    "border-radius": "1rem",
+    "box-shadow": "0 0.5rem 1rem rgba(0, 0, 0, 0.15)",
+    "padding": "2rem",
+    "position": "relative"
+  },
+  ".prompt-title": {
+    "color": "#5c7c9c",
+    "font-weight": "700"
+  },
+  ".copy-btn": {
+    "position": "absolute",
+    "top": "1rem",
+    "right": "1rem",
+    "border-radius": "0.5rem",
+    "padding": "0.5rem",
+    "display": "flex",
+    "align-items": "center",
+    "justify-content": "center",
+    "z-index": "10"
+  },
+  ".copy-btn svg": {
+    "width": "1.5rem",
+    "height": "1.5rem"
+  },
+  ".section-title": {
+    "color": "#5c7c9c",
+    "border-bottom": "2px solid #5c7c9c",
+    "padding-bottom": "0.5rem",
+    "margin-top": "1.5rem",
+    "margin-bottom": "1rem"
+  },
+  ".list-group-item": {
+    "background-color": "#f0f4f7",
+    "border-radius": "0.5rem",
+    "margin-bottom": "0.75rem"
+  },
+  ".format-example": {
+    "background-color": "#dee4ea",
+    "border-radius": "0.5rem",
+    "padding": "1rem",
+    "margin-top": "1rem"
+  },
+  ".copy-notice": {
+    "position": "absolute",
+    "bottom": "1rem",
+    "left": "50%",
+    "transform": "translateX(-50%)",
+    "background-color": "#5c8b7d",
+    "color": "white",
+    "padding": "0.5rem 1rem",
+    "border-radius": "0.5rem",
+    "display": "none",
+    "z-index": "1000"
+  },
+  "pre": {
+    "background-color": "#2b3e50",
+    "color": "#e6e8eb",
+    "padding": "1rem",
+    "border-radius": "0.5rem",
+    "white-space": "pre-wrap",
+    "word-wrap": "break-word"
+  },
+  ".nav-tabs .nav-link": {
+    "border": "none",
+    "color": "#5c7c9c",
+    "background-color": "transparent"
+  },
+  ".nav-tabs .nav-link.active": {
+    "background-color": "#5c7c9c",
+    "color": "#ffffff",
+    "border-bottom": "2px solid #5c7c9c"
+  },
+  ".tab-content": {
+    "display": "none"
+  },
+  ".tab-content.active": {
+    "display": "block"
+  },
+  ".btn-sm": {
+    "padding": "0.5rem 0.75rem",
+    "border-radius": "0.5rem"
+  },
+  "#copyButtonHTML": {
+    "background-color": "#5c7c9c",
+    "border-color": "#5c7c9c",
+    "color": "#fff"
+  },
+  "#copyButtonJSON": {
+    "background-color": "#5c7c9c",
+    "border-color": "#5c7c9c"
+  },
+  "#exportButtonJSON": {
+    "background-color": "#5c8b7d",
+    "border-color": "#5c8b7d"
+  }
+}
+        </pre>
+    </div>
+
+    <div id="copyNotice" class="copy-notice">Промпт скопирован!</div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-bs-target');
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.querySelector(targetId).classList.add('active');
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+            });
+
+            const copyButtonHTML = document.getElementById('copyButtonHTML');
+            const copyButtonJSON = document.getElementById('copyButtonJSON');
+            const exportButtonJSON = document.getElementById('exportButtonJSON');
+            const copyButtonCSS = document.getElementById('copyButtonCSS');
+            const exportButtonCSS = document.getElementById('exportButtonCSS');
+
+            function copyToClipboard(elementId, button) {
+                const promptContent = document.getElementById(elementId);
+                const copyNotice = document.getElementById('copyNotice');
+                button.style.display = 'none';
+
+                let textToCopy;
+                if (elementId === 'htmlPromptContent') {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = document.getElementById('htmlPromptContent').parentNode.innerHTML;
+                    tempDiv.querySelector('.copy-btn').remove();
+                    textToCopy = tempDiv.innerText;
+                } else {
+                    textToCopy = promptContent.innerText.trim();
+                }
+
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        copyNotice.innerText = 'Промпт скопирован!';
+                        copyNotice.style.display = 'block';
+                        setTimeout(() => {
+                            copyNotice.style.display = 'none';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Не удалось скопировать текст: ', err);
+                        fallbackCopyText(textToCopy);
+                    });
+                } else {
+                    fallbackCopyText(textToCopy);
+                }
+
+                setTimeout(() => {
+                    button.style.display = 'flex';
+                }, 100);
+            }
+
+            function fallbackCopyText(text) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.width = "2em";
+                textArea.style.height = "2em";
+                textArea.style.padding = "0";
+                textArea.style.border = "none";
+                textArea.style.outline = "none";
+                textArea.style.boxShadow = "none";
+                textArea.style.background = "transparent";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    document.getElementById('copyNotice').innerText = 'Промпт скопирован!';
+                } catch (err) {
+                    console.error('Не удалось скопировать текст: ', err);
+                    document.getElementById('copyNotice').innerText = 'Не удалось скопировать текст.';
+                }
+                document.body.removeChild(textArea);
+                document.getElementById('copyNotice').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('copyNotice').style.display = 'none';
+                }, 2000);
+            }
+
+            function exportJsonFile(contentId, filename) {
+                const jsonContent = document.getElementById(contentId).innerText.trim();
+                const blob = new Blob([jsonContent], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            copyButtonHTML.addEventListener('click', () => {
+                copyToClipboard('htmlPromptContent', copyButtonHTML);
+            });
+            copyButtonJSON.addEventListener('click', () => {
+                copyToClipboard('jsonPromptContent', copyButtonJSON);
+            });
+            exportButtonJSON.addEventListener('click', () => {
+                exportJsonFile('jsonPromptContent', 'prompt.json');
+            });
+            copyButtonCSS.addEventListener('click', () => {
+                copyToClipboard('cssPromptContent', copyButtonCSS);
+            });
+            exportButtonCSS.addEventListener('click', () => {
+                exportJsonFile('cssPromptContent', 'styles.json');
+            });
+        });
+    </script>
+
+</body>
+</html>
